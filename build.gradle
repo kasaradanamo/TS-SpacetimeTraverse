@@ -1,9 +1,9 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
 }
 
-version = "1.1.0"
+version = "1.1.0-beta"
 group = "net.kasara.ts_spacetime_traverse"
 
 base {

@@ -82,7 +82,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
     private void drawPortal(MatrixStack matrices, OrderedRenderCommandQueue queue, float alpha) {
         queue.submitCustom(
             matrices,
-            RenderLayer.getEntityTranslucent(TEXTURE),
+            RenderLayers.entityTranslucent(TEXTURE),
             (entry, vc) -> {
                 Matrix4f mat = entry.getPositionMatrix();
                 int light = 0xF000F0;   // 最大光源
