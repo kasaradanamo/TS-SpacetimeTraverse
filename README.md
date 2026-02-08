@@ -19,7 +19,7 @@ This Mod is an addon for <a href="https://modrinth.com/project/tokorotenslime" t
 
 ## Spatial Teleportation
 ### Crafting
-- Crafting requires 1 Ender Eye, 4 Netherite Ingots, and 4 Nether Stars.
+- Crafting requires 1 Ender Eye, 4 Netherite Ingots, and 4 Nether Stars.<br>
 ![spacetime_eye_recipe](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
 
 ### Specifications
@@ -56,7 +56,7 @@ The English explanation is above.<br>
 
 ## 空間移動
 ### クラフト
-- エンダーアイ、ネザライトインゴットx4、ネザースターx4をクラフトに使用します。
+- エンダーアイ、ネザライトインゴットx4、ネザースターx4をクラフトに使用します。<br>
 ![spacetime_eye_recipe](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
 
 ### 仕様
@@ -75,5 +75,6 @@ The English explanation is above.<br>
 <br><br>
 - **Cキー(デフォルト)**: クイック登録されたウェイポイント情報を持つポータルを出現させる(自分のポータルに目線を向けたまま押した場合、ポータルが消滅します)
 - **Cキー(デフォルト) + Ctrlキー**: ウェイポイントリスト画面を表示
+
 
 
