@@ -1,0 +1,35 @@
+{
+  "item.tokorotenslime.spacetime_eye": "時空の眼",
+
+  "block.tokorotenslime.void_block": "虚空ブロック",
+
+  "key.tokorotenslime.swap_positions": "位置入れ替え",
+  "key.tokorotenslime.portal_action": "ポータルアクション",
+
+  "advancements.tokorotenslime.use_spacetime_eye.description": "この眼は闇が...よく見える...",
+  "advancements.tokorotenslime.use_spacetime_eye.title": "開眼",
+
+  "message.tokorotenslime.not_place_portal": "ウェイポイントがクイック登録されてません",
+  "message.tokorotenslime.portal_failed": "ここにはポータルを設置できません",
+
+  "screen.tokorotenslime.portal_action.title": "ウェイポイント一覧",
+  "screen.tokorotenslime.portal_action.place": "ポータル設置",
+  "screen.tokorotenslime.portal_action.quick_register": "クイック",
+  "screen.tokorotenslime.portal_action.edit": "編集",
+  "screen.tokorotenslime.portal_action.delete": "削除",
+  "screen.tokorotenslime.portal_action.close": "閉じる",
+
+  "screen.tokorotenslime.waypoint_register.title": "ウェイポイント登録",
+  "screen.tokorotenslime.waypoint_edit.title": "ウェイポイント編集",
+  "screen.tokorotenslime.waypoint_register.name": "名前",
+  "screen.tokorotenslime.waypoint_register.dimension": "ディメンション",
+  "screen.tokorotenslime.waypoint_register.direction": "向き : %s",
+  "screen.tokorotenslime.waypoint_register.north": "北",
+  "screen.tokorotenslime.waypoint_register.east": "東",
+  "screen.tokorotenslime.waypoint_register.south": "南",
+  "screen.tokorotenslime.waypoint_register.west": "西",
+  "screen.tokorotenslime.waypoint_edit.save": "保存",
+
+  "screen.tokorotenslime.portal_action.delete.message": "このウェイポイントを削除しますか？",
+  "screen.tokorotenslime.portal_action.delete.cancel": "キャンセル"
+}

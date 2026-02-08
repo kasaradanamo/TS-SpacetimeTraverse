@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "ts_spacetime_traverse",
+	"version": "${version}",
+	"name": "Spacetime Traverse",
+	"description": "Add Spacetime Traverse to TokorotenSlime.",
+	"authors": [
+		"Kasara"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/ts-spacetime-traverse",
+        "issues": "https://github.com/kasaradanamo/TS-SpacetimeTraverse/issues"
+	},
+    "license": [
+        "Source code: MIT",
+        "Assets: All rights reserved"
+    ],
+	"icon": "assets/ts_spacetime_traverse/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse"
+		],
+		"fabric-datagen": [
+			"net.kasara.ts_spacetime_traverse.TSSpacetimeTraverseDataGenerator"
+		],
+		"client": [
+			"net.kasara.ts_spacetime_traverse.TSSpacetimeTraverseClient"
+		]
+	},
+	"mixins": [
+		"ts_spacetime_traverse.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.17.2",
+		"minecraft": "~1.21.9",
+		"java": ">=21",
+		"fabric-api": "*",
+		"tokorotenslime": ">=1.1.0"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

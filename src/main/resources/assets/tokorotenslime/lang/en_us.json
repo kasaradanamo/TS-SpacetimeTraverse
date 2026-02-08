@@ -1,0 +1,35 @@
+{
+  "item.tokorotenslime.spacetime_eye": "Spacetime Eye",
+
+  "block.tokorotenslime.void_block": "Void Block",
+
+  "key.tokorotenslime.swap_positions": "Position Swap",
+  "key.tokorotenslime.portal_action": "Portal Action",
+
+  "advancements.tokorotenslime.use_spacetime_eye.description": "These eyes see darkness... clearly...",
+  "advancements.tokorotenslime.use_spacetime_eye.title": "Eye Awakening",
+
+  "message.tokorotenslime.not_place_portal": "Waypoint not Quick registered,",
+  "message.tokorotenslime.portal_failed": "You can't place a portal here",
+
+  "screen.tokorotenslime.portal_action.title": "Waypoint List",
+  "screen.tokorotenslime.portal_action.place": "Place Portal",
+  "screen.tokorotenslime.portal_action.quick_register": "Quick",
+  "screen.tokorotenslime.portal_action.edit": "Edit",
+  "screen.tokorotenslime.portal_action.delete": "Delete",
+  "screen.tokorotenslime.portal_action.close": "Close",
+
+  "screen.tokorotenslime.waypoint_register.title": "Register Waypoint",
+  "screen.tokorotenslime.waypoint_edit.title": "Edit Waypoint",
+  "screen.tokorotenslime.waypoint_register.name": "Name",
+  "screen.tokorotenslime.waypoint_register.dimension": "Dimension",
+  "screen.tokorotenslime.waypoint_register.direction": "Direction : %s",
+  "screen.tokorotenslime.waypoint_register.north": "North",
+  "screen.tokorotenslime.waypoint_register.east": "East",
+  "screen.tokorotenslime.waypoint_register.south": "South",
+  "screen.tokorotenslime.waypoint_register.west": "West",
+  "screen.tokorotenslime.waypoint_edit.save": "Save",
+
+  "screen.tokorotenslime.portal_action.delete.message": "Are you sure you want ot delete this waypoint?",
+  "screen.tokorotenslime.portal_action.delete.cancel": "Cancel"
+}

@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "net.kasara.ts_spacetime_traverse.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+      "ClientAdvancementManagerAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

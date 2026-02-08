@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SNS",
+    "N#N",
+    "SNS"
+  ],
+  "key": {
+    "#": "minecraft:ender_eye",
+    "N": "minecraft:netherite_ingot",
+    "S": "minecraft:nether_star"
+  },
+  "result": {
+    "id": "tokorotenslime:spacetime_eye",
+    "count": 1
+  }
+}
