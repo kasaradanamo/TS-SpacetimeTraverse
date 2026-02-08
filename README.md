@@ -1,5 +1,5 @@
 # Spacetime Traverse
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/FcSdJLMeRiw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+![spacetime_traverse](https://cdn.modrinth.com/data/cached_images/31a55c1d31050eddd575e3ff7725fb69fc5b9854_0.webp)
 
 - **<a href="https://x.com/kasaradanamo" target="_blank">X(Twitter)</a>**<br>
 - **<a href="https://github.com/kasaradanamo/TS-SpacetimeTraverse" target="_blank">GitHub</a>**<br>
@@ -20,7 +20,7 @@ This Mod is an addon for <a href="https://modrinth.com/project/tokorotenslime" t
 ## Spatial Teleportation
 ### Crafting
 - Crafting requires 1 Ender Eye, 4 Netherite Ingots, and 4 Nether Stars.
-![current_features](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
+![spacetime_eye_recipe](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
 
 ### Specifications
 - Using the item unlocks an advancement, which allows access to the Portal Action Button.
@@ -57,7 +57,7 @@ The English explanation is above.<br>
 ## 空間移動
 ### クラフト
 - エンダーアイ、ネザライトインゴットx4、ネザースターx4をクラフトに使用します。
-![current_features](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
+![spacetime_eye_recipe](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
 
 ### 仕様
 - アイテムを使用することで実績を解除し、ポータルアクションボタンを使用することができるようになります。
@@ -75,4 +75,5 @@ The English explanation is above.<br>
 <br><br>
 - **Cキー(デフォルト)**: クイック登録されたウェイポイント情報を持つポータルを出現させる(自分のポータルに目線を向けたまま押した場合、ポータルが消滅します)
 - **Cキー(デフォルト) + Ctrlキー**: ウェイポイントリスト画面を表示
+
 
