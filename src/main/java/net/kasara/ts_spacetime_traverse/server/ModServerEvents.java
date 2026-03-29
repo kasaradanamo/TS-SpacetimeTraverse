@@ -1,19 +1,24 @@
 package net.kasara.ts_spacetime_traverse.server;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.DimensionListS2CPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.WaypointInfoS2CPacket;
+import net.kasara.ts_spacetime_traverse.util.DimensionBounds;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
+import net.minecraft.world.border.WorldBorder;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * サーバー側の各種イベントを登録するクラス
@@ -39,7 +44,13 @@ public class ModServerEvents {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             UUID uuid = handler.getPlayer().getUuid();
             // 所有しているポータルを全て破棄
-            ServerPortalHandler.discardOwnedPortals(server, uuid);
+            PortalHandler.discardOwnedPortals(server, uuid);
+        });
+
+        // サーバーが終了するとき
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+           // すべてのポータルを削除
+           PortalHandler.discardAllPortals(server);
         });
 
         // プレイヤーエンティティがコピーされるとき（死亡・ディメンション移動など）
@@ -56,12 +67,26 @@ public class ModServerEvents {
      * ディメンション名リストを作成してパケット送信
      */
     private static void sendDimensionList(MinecraftServer server, ServerPlayerEntity player) {
-        Set<Identifier> dimensions = server.getRegistryManager()
-                .getOrThrow(RegistryKeys.WORLD)
-                .streamKeys()
-                .map(RegistryKey::getValue)
-                .collect(Collectors.toSet());
+        Map<Identifier, DimensionBounds> map = new HashMap<>();
 
-        DimensionListS2CPacket.send(player, dimensions);
+        for (RegistryKey<World> key : server.getWorldRegistryKeys()) {
+            ServerWorld world = server.getWorld(key);
+            if (world == null) continue;
+
+            WorldBorder border = world.getWorldBorder();
+
+            DimensionBounds info = new DimensionBounds(
+                    world.getBottomY() + 1,
+                    world.getTopYInclusive(),
+                    border.getBoundWest(),
+                    border.getBoundEast(),
+                    border.getBoundNorth(),
+                    border.getBoundSouth()
+            );
+
+            map.put(key.getValue(), info);
+        }
+
+        DimensionListS2CPacket.send(player, map);
     }
 }

@@ -3,9 +3,10 @@ package net.kasara.ts_spacetime_traverse.client.render.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
-import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
 import net.kasara.ts_spacetime_traverse.client.render.entity.state.PortalRenderState;
-import net.minecraft.client.render.*;
+import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
@@ -14,12 +15,11 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 /**
- * PortalEntity の描画を担当するクラス
+ * PortalEntityの描画クラス
  */
 @Environment(EnvType.CLIENT)
 public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderState>{
@@ -37,7 +37,6 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
 
     @Override
     public PortalRenderState createRenderState() {
-        // 各エンティティの描画状態を管理するPortalRenderStateを生成
         return new PortalRenderState();
     }
 
@@ -99,13 +98,6 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
 
     /**
      * ポータル上にテキストラベルを描画
-     *
-     * @param state 描画状態
-     * @param matrices MatrixStack
-     * @param queue RenderCommandQueue
-     * @param cameraState カメラ状態
-     * @param text 表示する文字列
-     * @param yOffset 高さオフセット
      */
     private void drawText(PortalRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState, String text, float yOffset) {
         if (text == null || text.isEmpty()) return;
@@ -132,8 +124,8 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
     public void updateRenderState(PortalEntity entity, PortalRenderState state, float tickProgress) {
         super.updateRenderState(entity, state, tickProgress);
 
-        long worldTime = entity.getEntityWorld().getTime();
         long spawnTick = entity.getSpawnTick();
+        float now = entity.getEntityWorld().getTime() + tickProgress;
 
         // スポーン前の初期化
         if (spawnTick <= 0) {
@@ -147,7 +139,24 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
             return;
         }
 
-        float now = worldTime + tickProgress;
+        state.scale = getScale(entity, now, spawnTick);
+        state.spin = now * SPIN_SPEED;
+        state.entityPos = entity.getLerpedPos(tickProgress);
+
+        state.ownerName = entity.getOwnerName();
+        state.waypointName = entity.getWaypointName();
+        state.posText = entity.getTargetPosText();
+    }
+
+    /**
+     * スケール取得
+     *
+     * @param entity ポータルエンティティ
+     * @param now 今の時間
+     * @param spawnTick スポーンした時の時間
+     * @return スケール
+     */
+    private float getScale(PortalEntity entity, float now, long spawnTick) {
         float scale;
 
         // 消失アニメーション中
@@ -165,12 +174,6 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
             float elapsed = now - spawnTick;
             scale = Math.min(elapsed / entity.getAnimationDuration(), 1.0f);
         }
-        state.scale = scale;
-        state.spin = now * SPIN_SPEED;
-        state.entityPos = entity.getLerpedPos(tickProgress);
-
-        state.ownerName = entity.getOwnerName();
-        state.waypointName = entity.getWaypointName();
-        state.posText = entity.getTargetPosText();
+        return scale;
     }
 }

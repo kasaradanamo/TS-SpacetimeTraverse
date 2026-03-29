@@ -25,7 +25,7 @@ public record PortalActionController(PortalActionScreen screen) {
      *
      * @param selected 現在選択されているリストエントリ
      */
-    public void onPlacePortal(@Nullable WaypointListWidget.Entry selected) {
+    public void onPlacePortal(WaypointListWidget.@Nullable Entry selected) {
         if (selected == null) return;
         screen.close(); // 画面を閉じる
         PortalActionClientHandler.placePortal(MinecraftClient.getInstance().player, selected.data.uuid());
@@ -43,7 +43,7 @@ public record PortalActionController(PortalActionScreen screen) {
      *
      * @param selected 選択エントリ
      */
-    public void onQuickRegister(@Nullable WaypointListWidget.Entry selected) {
+    public void onQuickRegister(WaypointListWidget.@Nullable Entry selected) {
         if (selected == null) return;
         WaypointClientManager.registerQuick(selected.data.uuid());
         screen.updateActionButtons(selected);   // ボタン状態更新
@@ -52,7 +52,7 @@ public record PortalActionController(PortalActionScreen screen) {
     /**
      * 選択ウェイポイントを編集
      */
-    public void onEditWaypoint(@Nullable WaypointListWidget.Entry selected) {
+    public void onEditWaypoint(WaypointListWidget.@Nullable Entry selected) {
         if (selected == null) return;
         MinecraftClient.getInstance().setScreen(WaypointFormScreen.edit(screen, selected.data));
     }
@@ -62,7 +62,7 @@ public record PortalActionController(PortalActionScreen screen) {
      *
      * @param selected 選択エントリ
      */
-    public void onDeleteWaypoint(@Nullable WaypointListWidget.Entry selected) {
+    public void onDeleteWaypoint(WaypointListWidget.@Nullable Entry selected) {
         if (selected == null) return;
 
         // 確認画面を表示して、削除を実行
@@ -97,7 +97,7 @@ public record PortalActionController(PortalActionScreen screen) {
      * @param register ウェイポイント登録ボタン
      */
     public void updateButtons(
-            @Nullable WaypointListWidget.Entry selected,
+            WaypointListWidget.@Nullable Entry selected,
             ButtonWidget place,
             ButtonWidget quick,
             ButtonWidget edit,

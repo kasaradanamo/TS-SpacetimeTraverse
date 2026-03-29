@@ -12,24 +12,13 @@ import net.minecraft.util.Rarity;
 
 import java.util.function.Function;
 
-/**
- * Modで追加するアイテムを登録するクラス
- */
 public class ModItems {
 
-    /** 時空の目アイテムの登録 */
+    // 時空の目アイテムの登録
     public static final Item SPACETIME_EYE = registerAndAddToTab("spacetime_eye", setting -> new SpacetimeEyeItem(
             setting.fireproof().rarity(Rarity.EPIC)));
 
-    /**
-     * アイテムを登録し、必要ならアイテムタブにも追加する共通メソッド
-     *
-     * @param name     アイテムIDの名前部分
-     * @param function Item.Settings から Item を生成するファクトリ
-     * @return 登録済みの Item インスタンス
-     */
     private static Item registerAndAddToTab(String name, Function<Item.Settings, Item> function) {
-        // Item.Settings から Item を生成
         Item item = Registry.register(
                 Registries.ITEM,
                 Identifier.of(TokorotenSlimeAPI.getModId(), name),
@@ -37,8 +26,7 @@ public class ModItems {
                         RegistryKey.of(RegistryKeys.ITEM, Identifier.of(TokorotenSlimeAPI.getModId(), name)))
                 )
         );
-
-        // アイテムタブに追加
+        // API経由でグループに追加
         TokorotenSlimeAPI.addItemToTab(item);
         return item;
     }

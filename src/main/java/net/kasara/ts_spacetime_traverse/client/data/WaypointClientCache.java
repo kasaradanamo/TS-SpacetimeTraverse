@@ -1,5 +1,7 @@
 package net.kasara.ts_spacetime_traverse.client.data;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,6 +10,7 @@ import java.util.*;
 /**
  * クライアント側でのウェイポイントキャッシュ
  */
+@Environment(EnvType.CLIENT)
 public final class WaypointClientCache {
 
     //  UUIDをキーにしたウェイポイントマップ（順序保持）
@@ -15,8 +18,6 @@ public final class WaypointClientCache {
 
     // クイックウェイポイントのUUID
     private static UUID quickUuid = null;
-
-    private WaypointClientCache() {}
 
     /**
      * 全ウェイポイントを取得
@@ -28,7 +29,6 @@ public final class WaypointClientCache {
     /**
      * 指定UUIDのウェイポイントを取得
      *
-     * @param uuid waypointのUUID
      * @return 該当がなければnull
      */
     public static @Nullable WaypointData get(UUID uuid) {
@@ -100,4 +100,6 @@ public final class WaypointClientCache {
         waypointMap.clear();
         quickUuid = null;
     }
+
+    private WaypointClientCache() {}
 }

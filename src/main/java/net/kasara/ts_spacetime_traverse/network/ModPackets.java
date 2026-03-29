@@ -20,7 +20,8 @@ public class ModPackets {
 
     // PayloadTypesの登録
     public static void registerPayloadTypes() {
-        registerPTC2S(TargetEntityIdC2SPacket.ID, TargetEntityIdC2SPacket.CODEC);
+        registerPTC2S(PositionSwapC2SPacket.ID, PositionSwapC2SPacket.CODEC);
+        registerPTC2S(PositionSwapModeC2SPacket.ID, PositionSwapModeC2SPacket.CODEC);
         registerPTC2S(ApplyWaypointChangeC2SPacket.ID, ApplyWaypointChangeC2SPacket.CODEC);
         registerPTC2S(RegisterQuickC2SPacket.ID, RegisterQuickC2SPacket.CODEC);
         registerPTC2S(PlacePortalC2SPacket.ID, PlacePortalC2SPacket.CODEC);
@@ -35,7 +36,8 @@ public class ModPackets {
 
     // C2Sの登録
     public static void registerC2SPackets() {
-        registerC2S(TargetEntityIdC2SPacket.ID, TargetEntityIdC2SPacket::receive);
+        registerC2S(PositionSwapC2SPacket.ID, PositionSwapC2SPacket::receive);
+        registerC2S(PositionSwapModeC2SPacket.ID, PositionSwapModeC2SPacket::receive);
         registerC2S(ApplyWaypointChangeC2SPacket.ID, ApplyWaypointChangeC2SPacket::receive);
         registerC2S(RegisterQuickC2SPacket.ID, RegisterQuickC2SPacket::receive);
         registerC2S(PlacePortalC2SPacket.ID, PlacePortalC2SPacket::receive);

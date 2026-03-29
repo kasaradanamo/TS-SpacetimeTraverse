@@ -5,14 +5,15 @@ import net.fabricmc.api.Environment;
 import net.kasara.ts_spacetime_traverse.client.WaypointClientManager;
 import net.kasara.ts_spacetime_traverse.client.gui.widget.WaypointFormBodyWidget;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import net.kasara.ts_spacetime_traverse.util.WaypointDataFactory;
+import net.kasara.ts_spacetime_traverse.util.WaypointDataUtil;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.GridWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 /**
  * ウェイポイントの「登録」と「編集」を共通で扱う画面
@@ -36,9 +37,10 @@ public class WaypointFormScreen extends Screen {
     private final Mode mode;
 
     // 編集対象のデータ(登録時はnull)
-    @Nullable private final WaypointData data;
+    @Nullable
+    private final WaypointData data;
 
-    /** 画面全体のレイアウト */
+    // 画面全体のレイアウト
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this, 8 + 9 + 8 + 4);
 
     // 入力フォームウィジェット
@@ -47,7 +49,7 @@ public class WaypointFormScreen extends Screen {
     // 登録/保存ボタン
     private ButtonWidget confirmButton;
 
-    /** 画面動作モード */
+    // 画面動作モード
     public enum Mode {
         REGISTER,
         EDIT
@@ -96,7 +98,7 @@ public class WaypointFormScreen extends Screen {
         this.initFooter();
 
         // layout に登録された widget をまとめて Screen に追加
-        this.layout.forEachChild(widget -> this.addDrawableChild((ClickableWidget) widget));
+        this.layout.forEachChild(this::addDrawableChild);
 
         // 画面サイズに応じて位置計算
         this.refreshWidgetPositions();
@@ -146,7 +148,7 @@ public class WaypointFormScreen extends Screen {
                     if (!entry.isValid()) return;
 
                     // 入力内容から WaypointData を生成
-                    WaypointData data = WaypointDataFactory.fromInputs(
+                    WaypointData data = WaypointDataUtil.fromInputs(
                             mode == Mode.EDIT ? this.data.uuid() : null,
                             entry.getWaypointName(),
                             entry.getWaypointDimension(),
@@ -166,7 +168,7 @@ public class WaypointFormScreen extends Screen {
                     }
 
                     // 親画面へ戻る
-                    Objects.requireNonNull(this.client).setScreen(this.parent);
+                    this.client.setScreen(this.parent);
                 }
         ).width(120).build();
         confirmButton.active = false;
@@ -197,7 +199,7 @@ public class WaypointFormScreen extends Screen {
      */
     @Override
     public void close() {
-        Objects.requireNonNull(this.client).setScreen(this.parent);
+        this.client.setScreen(this.parent);
     }
 
     /**
@@ -240,5 +242,4 @@ public class WaypointFormScreen extends Screen {
         this.setInitialFocus(nameField);
         nameField.setFocused(true);
     }
-
 }

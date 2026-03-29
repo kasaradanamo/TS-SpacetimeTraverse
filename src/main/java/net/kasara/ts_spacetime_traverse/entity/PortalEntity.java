@@ -1,16 +1,16 @@
 package net.kasara.ts_spacetime_traverse.entity;
 
 import net.kasara.ts_spacetime_traverse.block.ModBlocks;
-import net.kasara.ts_spacetime_traverse.server.ServerPortalHandler;
+import net.kasara.ts_spacetime_traverse.server.PortalHandler;
 import net.kasara.ts_spacetime_traverse.server.ServerPortalManager;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,32 +21,23 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 /**
  * ワープ用ポータルエンティティ
- *
- * 主な責務：
- * ・Waypoint 情報を DataTracker で同期
- * ・エンティティ侵入検知 → ワープ処理
- * ・一定時間後の消滅アニメーション管理
- * ・リンクポータル（行き/帰り）の管理
- * ・ポータル周辺チャンクのロード維持
  */
 public class PortalEntity extends Entity {
 
-    /** ポータルの生存時間（tick） */
+    // ポータルの生存時間（tick）
     public static final int LIFETIME_TICKS = 20 * 60;  // (20t/s)
 
-    /** 出現・消滅アニメーション時間（tick） */
+    // 出現・消滅アニメーション時間（tick）
     public static final int ANIMATION_TICKS = (int) (20 * 1.2f);
 
     // 所有者情報
@@ -152,22 +143,26 @@ public class PortalEntity extends Entity {
         // ポータル内に侵入したエンティティを検出して転送
         String dimension = dataTracker.get(TARGET_DIMENSION_NAME);
         if (!dimension.isEmpty()) {
-            ServerWorld targetWorld = Objects.requireNonNull(getEntityWorld().getServer())
+            ServerWorld targetWorld = getEntityWorld().getServer()
                     .getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(dimension)));
 
             if (targetWorld != null) {
-                getEntityWorld().getOtherEntities(this, getBoundingBox())
-                        .forEach(entity -> teleport(entity, targetWorld));
+                Box portalBox = this.getBoundingBox();
+
+                for (Entity entity : getEntityWorld().getOtherEntities(this, portalBox.expand(3))) {
+                    if (!(entity instanceof PortalEntity) && shouldTeleport(entity, portalBox)) {
+                        teleport(entity, targetWorld);
+                    }
+                }
             }
         }
 
         // チャンクのアンロード防止
         if (--chunkTicketExpiryTicks <= 0L) {
-            serverWorld.resetIdleTimeout();
             serverWorld.getChunkManager().addTicket(
                     ChunkTicketType.ENDER_PEARL,
-                    new ChunkPos(getBlockPos()),
-                    2
+                    getChunkPos(),
+                    3
             );
             chunkTicketExpiryTicks = ChunkTicketType.ENDER_PEARL.expiryTicks();
         }
@@ -216,6 +211,22 @@ public class PortalEntity extends Entity {
     }
 
     /**
+     * ポータルに入るかの判定
+     */
+    private boolean shouldTeleport(Entity entity, Box portalBox) {
+        //接触判定
+        if (entity.getBoundingBox().intersects(portalBox)) {
+            return true;
+        }
+
+        //高速通過判定
+        Vec3d prevPos = new Vec3d(entity.lastX, entity.lastY, entity.lastZ);
+        Vec3d currentPos = entity.getEntityPos();
+
+        return portalBox.raycast(prevPos, currentPos).isPresent();
+    }
+
+    /**
      * ワープ処理
      *
      * @param entity 入ったEntity
@@ -227,25 +238,42 @@ public class PortalEntity extends Entity {
 
         BlockPos targetBlockPos = getTargetBlockPos();
 
-        // 足場用の VoidBlock を配置
-        tryPlaceVoidBlock(targetWorld, targetBlockPos);
-
-        int x = targetBlockPos.getX();
-        int y = targetBlockPos.getY();
-        int z = targetBlockPos.getZ();
+        double x = targetBlockPos.getX() + 0.5;
+        double y = targetBlockPos.getY();
+        double z = targetBlockPos.getZ() + 0.5;
         float yaw = getTargetYaw();
+        float pitch = entity.getPitch();
+        Vec3d motion = entity.getVelocity().rotateY((float) Math.toRadians(yaw - entity.getYaw()));
 
-        Set<PositionFlag> flags = EnumSet.noneOf(PositionFlag.class);
-        entity.teleport(targetWorld, x + 0.5, y, z + 0.5, flags, yaw, entity.getPitch(), true);
+        // 足場用の VoidBlock を配置
+        if (entity instanceof LivingEntity le && !le.isGliding()) {
+            tryPlaceVoidBlock(targetWorld, targetBlockPos);
+            motion = new Vec3d(0, 0, 0);
+        }
+
+        // プレイヤーは同期
+        if (entity instanceof ServerPlayerEntity player) {
+            player.networkHandler.requestTeleport(x, y, z, yaw, pitch);
+            player.velocityDirty = true;
+        }
+
+        TeleportTarget target = new TeleportTarget(
+                targetWorld,
+                new Vec3d(x, y, z),
+                motion,
+                yaw,
+                pitch,
+                false,
+                false,
+                Set.of(),
+                TeleportTarget.ADD_PORTAL_CHUNK_TICKET
+        );
+
+        entity.teleportTo(target);
         entity.fallDistance = 0.0f;
 
         // サーバー側フック処理
-        ServerPortalHandler.handlePortalEntry(entity, this);
-
-        // プレイヤーは明示的に同期
-        if(entity instanceof ServerPlayerEntity player) {
-            player.networkHandler.requestTeleport(x + 0.5, y, z + 0.5, yaw, entity.getPitch());
-        }
+        PortalHandler.handlePortalEntry(entity, this);
     }
 
     /**
@@ -341,8 +369,7 @@ public class PortalEntity extends Entity {
     public @Nullable PortalEntity getLinkedPortal() {
         String uuidStr = dataTracker.get(LINKED_PORTAL_UUID);
         if (uuidStr.isEmpty()) return null;
-        return (PortalEntity) Objects.requireNonNull(Objects.requireNonNull(
-                getEntityWorld().getServer()).getWorld(getTargetDimension())).getEntity(UUID.fromString(uuidStr));
+        return (PortalEntity) getEntityWorld().getServer().getWorld(getTargetDimension()).getEntity(UUID.fromString(uuidStr));
     }
 
     public float getAnimationDuration() {
@@ -353,9 +380,11 @@ public class PortalEntity extends Entity {
         return dataTracker.get(IS_PLACE_PORTAL);
     }
 
+    /**
+     * ダメージを受けない
+     */
     @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
-        // ポータルは破壊不可
         return false;
     }
 

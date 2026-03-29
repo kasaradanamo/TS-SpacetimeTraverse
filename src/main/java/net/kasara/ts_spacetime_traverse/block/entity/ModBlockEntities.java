@@ -9,12 +9,9 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
-/**
- * MODで使用するBlockEntityタイプの管理クラス
- */
 public class ModBlockEntities {
 
-    /** VoidBlock用のBlockEntity */
+    // VoidBlock用のBlockEntity
     public static BlockEntityType<VoidBlockEntity> VOID_BE;
 
     /**

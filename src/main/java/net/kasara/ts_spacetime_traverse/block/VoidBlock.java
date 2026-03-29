@@ -14,21 +14,16 @@ import net.minecraft.world.World;
  * ポータルくぐった際足元何もなかった時に出てくる一時ブロック
  */
 public class VoidBlock extends TransparentBlock implements BlockEntityProvider {
+
     public VoidBlock(Settings settings) {
         super(settings);
     }
 
-    /**
-     * ブロックエンティティの生成
-     */
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new VoidBlockEntity(pos, state);
     }
 
-    /**
-     * サーバー側でのTick処理取得
-     */
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         // クライアント側では処理不要

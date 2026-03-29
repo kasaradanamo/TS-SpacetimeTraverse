@@ -24,7 +24,7 @@ import java.util.UUID;
 @Environment(EnvType.CLIENT)
 public class WaypointListWidget extends AlwaysSelectedEntryListWidget<WaypointListWidget.Entry> {
 
-    /** このリストを持つScreen*/
+    // このリストを持つScreen
     public final PortalActionScreen parentScreen;
 
     public WaypointListWidget(MinecraftClient client, PortalActionScreen screen) {
@@ -40,7 +40,7 @@ public class WaypointListWidget extends AlwaysSelectedEntryListWidget<WaypointLi
      * リストの各エントリ
      */
     @Environment(EnvType.CLIENT)
-    public static class Entry extends AlwaysSelectedEntryListWidget.Entry<WaypointListWidget.Entry> {
+    public static class Entry extends AlwaysSelectedEntryListWidget.Entry<Entry> {
 
         private static final Identifier TRUE_QUICK_ICON =
                 Identifier.of(TokorotenSlimeAPI.getModId(), "textures/item/spacetime_eye.png");

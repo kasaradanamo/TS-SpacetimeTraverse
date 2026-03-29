@@ -3,12 +3,16 @@
 
   "block.tokorotenslime.void_block": "Void Block",
 
-  "key.tokorotenslime.swap_positions": "Position Swap",
+  "key.tokorotenslime.position_swap": "Position Swap",
   "key.tokorotenslime.portal_action": "Portal Action",
 
   "advancements.tokorotenslime.use_spacetime_eye.description": "These eyes see darkness... clearly...",
   "advancements.tokorotenslime.use_spacetime_eye.title": "Eye Awakening",
 
+  "mode.tokorotenslime.position_swap.normal": "Normal",
+  "mode.tokorotenslime.position_swap.enhanced": "Enhanced",
+
+  "message.tokorotenslime.position_swap_mode": "Position Swap Mode changed to %s!",
   "message.tokorotenslime.not_place_portal": "Waypoint not Quick registered,",
   "message.tokorotenslime.portal_failed": "You can't place a portal here",
 

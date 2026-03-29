@@ -1,6 +1,7 @@
 package net.kasara.ts_spacetime_traverse.item;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
+import net.kasara.ts_spacetime_traverse.server.PositionSwapModeManager;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,8 +15,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-import java.util.Objects;
-
 /**
  * プレイヤーが使用すると特定の進捗を付与し、アイテムを消費するカスタムアイテム。
  */
@@ -24,14 +23,6 @@ public class SpacetimeEyeItem extends Item {
         super(settings);
     }
 
-    /**
-     * プレイヤーがアイテムを右クリックしたときに呼ばれるメソッド。
-     *
-     * @param world ワールド
-     * @param user 使ったプレイヤー
-     * @param hand 使った手
-     * @return ActionResult.SUCCESS 常に成功として返す
-     */
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
         // 使用した手をMinecraftに通知(アニメーションなどで必要)
@@ -47,7 +38,7 @@ public class SpacetimeEyeItem extends Item {
             PlayerAdvancementTracker tracker = serverPlayer.getAdvancementTracker();
 
             // JSONで作った子進捗を取得
-            AdvancementEntry adv = Objects.requireNonNull(serverPlayer.getEntityWorld().getServer())
+            AdvancementEntry adv = serverPlayer.getEntityWorld().getServer()
                     .getAdvancementLoader()
                     .get(Identifier.of(TokorotenSlimeAPI.getModId(), "use_spacetime_eye"));
 
@@ -55,6 +46,9 @@ public class SpacetimeEyeItem extends Item {
             if (adv != null && !tracker.getProgress(adv).isDone()) {
                 // 進捗を達成させる
                 tracker.grantCriterion(adv, "use_spacetime_eye");
+
+                // モード変更
+                PositionSwapModeManager.toggle(user);
 
                 // アイテム消費（クリエイティブは減らさない）
                 stack.decrementUnlessCreative(1, user);

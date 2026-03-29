@@ -1,7 +1,6 @@
 package net.kasara.ts_spacetime_traverse;
 
 import net.fabricmc.api.ModInitializer;
-
 import net.kasara.ts_spacetime_traverse.block.ModBlocks;
 import net.kasara.ts_spacetime_traverse.block.entity.ModBlockEntities;
 import net.kasara.ts_spacetime_traverse.entity.ModEntities;
