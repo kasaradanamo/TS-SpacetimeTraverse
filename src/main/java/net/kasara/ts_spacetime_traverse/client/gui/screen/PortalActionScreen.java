@@ -10,7 +10,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * ポータル操作用のメイン画面
@@ -18,20 +18,20 @@ import org.jetbrains.annotations.Nullable;
 @Environment(EnvType.CLIENT)
 public class PortalActionScreen extends Screen {
 
-    /** 3分割レイアウト(ヘッダー/ボディ/フッター) */
+    // 3分割レイアウト(ヘッダー/ボディ/フッター)
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this, 8 + 9 + 8 + 4, 60);
 
     // 中央のウェイポイントリスト
     private WaypointListWidget body;
 
-    /** ボタン群 */
+    // ボタン群
     protected ButtonWidget waypointRegisterButton;
     protected ButtonWidget portalPlaceButton;
     protected ButtonWidget quickRegisterButton;
     protected ButtonWidget editButton;
     protected ButtonWidget deleteButton;
 
-    /** ボタン押下などの処理を担当するコントローラ */
+    // ボタン押下などの処理を担当するコントローラ
     private final PortalActionController controller;
 
     public PortalActionScreen() {
@@ -151,7 +151,7 @@ public class PortalActionScreen extends Screen {
      *
      * @param selected 現在選択されているリストエントリ
      */
-    public void updateActionButtons(@Nullable WaypointListWidget.Entry selected) {
+    public void updateActionButtons(WaypointListWidget.@Nullable Entry selected) {
         controller.updateButtons(
                 selected,
                 portalPlaceButton,

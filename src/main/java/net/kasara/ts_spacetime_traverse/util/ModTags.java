@@ -10,14 +10,9 @@ public class ModTags {
 
     public static class Blocks {
 
-        /** すり抜けれるブロック */
+        // すり抜けれるブロック
         public static final TagKey<Block> PASS_THROUGH_BLOCK = createTag("pass_through_block");
 
-        /**
-         * タグを作成するヘルパーメソッド
-         * @param name タグ名
-         * @return Block用のTagKey
-         */
         private static TagKey<Block> createTag(String name) {
             return TagKey.of(RegistryKeys.BLOCK, Identifier.of(TokorotenSlimeAPI.getModId(), name));
         }

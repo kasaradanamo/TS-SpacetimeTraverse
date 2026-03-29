@@ -24,7 +24,7 @@ import java.util.UUID;
 @Environment(EnvType.CLIENT)
 public class WaypointListWidget extends AlwaysSelectedEntryListWidget<WaypointListWidget.Entry> {
 
-    /** このリストを持つScreen*/
+    // このリストを持つScreen
     public final PortalActionScreen parentScreen;
 
     public WaypointListWidget(MinecraftClient client, PortalActionScreen screen) {

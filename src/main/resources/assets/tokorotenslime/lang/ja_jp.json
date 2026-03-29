@@ -3,12 +3,16 @@
 
   "block.tokorotenslime.void_block": "虚空ブロック",
 
-  "key.tokorotenslime.swap_positions": "位置入れ替え",
+  "key.tokorotenslime.position_swap": "位置入れ替え",
   "key.tokorotenslime.portal_action": "ポータルアクション",
 
   "advancements.tokorotenslime.use_spacetime_eye.description": "この眼は闇が...よく見える...",
   "advancements.tokorotenslime.use_spacetime_eye.title": "開眼",
 
+  "mode.tokorotenslime.position_swap.normal": "ノーマル",
+  "mode.tokorotenslime.position_swap.enhanced": "強化",
+
+  "message.tokorotenslime.position_swap_mode": "位置入れ替えが %s モードになりました！",
   "message.tokorotenslime.not_place_portal": "ウェイポイントがクイック登録されてません",
   "message.tokorotenslime.portal_failed": "ここにはポータルを設置できません",
 

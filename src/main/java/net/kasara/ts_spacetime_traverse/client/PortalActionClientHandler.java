@@ -2,22 +2,19 @@ package net.kasara.ts_spacetime_traverse.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.client.gui.screen.PortalActionScreen;
+import net.kasara.ts_spacetime_traverse.client.util.ClientAdvancementUtil;
 import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
-import net.kasara.ts_spacetime_traverse.mixin.ClientAdvancementManagerAccessor;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.PlacePortalC2SPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.VanishPortalC2SPacket;
 import net.kasara.ts_spacetime_traverse.client.option.ModKeyBindings;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
@@ -28,17 +25,11 @@ import java.util.*;
 @Environment(EnvType.CLIENT)
 public class PortalActionClientHandler {
 
-    // 使用可能かどうかを判定するための実績ID
-    private static final Identifier SPACETIME_ADVANCEMENT =
-            Identifier.of(TokorotenSlimeAPI.getModId(), "use_spacetime_eye");
-
     // キー押下を1回の入力として扱うためのフラグ（押しっぱなし防止）
     private static boolean keyPressed = false;
 
     /**
      * キーアクションを処理
-     *
-     * @param client マインクラフトインスタンス
      */
     public static void handlePortalAction(MinecraftClient client) {
         PlayerEntity player = client.player;
@@ -47,7 +38,7 @@ public class PortalActionClientHandler {
         if (!pushKey()) return; // 押された瞬間のみtrue
 
         // 対応する実績を解除してない場合使用不可
-        if (!hasUnlockedSpacetimeAdvancement(client)) return;
+        if (!ClientAdvancementUtil.hasUnlockedSpacetimeAdvancement(client)) return;
 
         // Ctrlキーが押されてるかどうか
         boolean ctrlPressed = GLFW.glfwGetKey(client.getWindow().getHandle(),
@@ -57,7 +48,7 @@ public class PortalActionClientHandler {
             client.setScreen(new PortalActionScreen()); // GUIを開く
         } else {
             // 通常押下:視線上にポータルがあれば消去、なければ設置
-            var lookedPortal = getLookedPortal(client, player);
+            PortalEntity lookedPortal = getLookedPortal(client, player);
             if (lookedPortal != null) {
                 VanishPortalC2SPacket.send();
             } else {
@@ -84,36 +75,13 @@ public class PortalActionClientHandler {
     }
 
     /**
-     * クライアント側の実績情報を使って、特定の実績が解除済みかどうか判定
-     *
-     * @param client マインクラフトインスタンス
-     * @return 実績が解除されてればtrue、されてなければfalse
-     */
-    private static boolean hasUnlockedSpacetimeAdvancement(MinecraftClient client) {
-        if (client == null || client.player == null || client.getNetworkHandler() == null) return false;
-
-        var clientAdvancementManager = client.getNetworkHandler().getAdvancementHandler();
-        if (clientAdvancementManager == null) return false;
-
-        // mixin経由で進捗マップを取得
-        Map<AdvancementEntry, AdvancementProgress> progresses =
-                ((ClientAdvancementManagerAccessor) clientAdvancementManager).getAdvancementProgresses();
-
-        AdvancementEntry entry = clientAdvancementManager.get(SPACETIME_ADVANCEMENT);
-        if (entry == null) return false;
-
-        AdvancementProgress progress = progresses.get(entry);
-        return progress != null && progress.isDone();
-    }
-
-    /**
      * プレイヤーの視線上にある自分が保有するポータルを取得
      *
      * @param client マインクラフトインスタンス
      * @param player 視線判定を行うプレイヤー
      * @return 視線上のポータルエンティティ(なければnull)
      */
-    private static PortalEntity getLookedPortal(MinecraftClient client, PlayerEntity player) {
+    private static @Nullable PortalEntity getLookedPortal(MinecraftClient client, PlayerEntity player) {
         if (client.world == null) return null;
 
         double maxDistance = 64.0;

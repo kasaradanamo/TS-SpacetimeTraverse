@@ -13,7 +13,7 @@ import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 public class ModClientEvents {
 
     /**
-     * ライアントイベントをまとめて登録する
+     * ライアントイベントをまとめて登録
      */
     public static void registerEvents() {
         // クライアントの毎Tick終了時に呼ばれるイベント
@@ -21,7 +21,7 @@ public class ModClientEvents {
             if (client.player == null) return;
 
             // 位置入れ替え系のキー入力・処理
-            SwapPositionsClientHandler.handleSwapPositions(client);
+            PositionSwapClientHandler.handleSwapPositions(client);
 
             // ポータル操作系のキー入力・処理
             PortalActionClientHandler.handlePortalAction(client);

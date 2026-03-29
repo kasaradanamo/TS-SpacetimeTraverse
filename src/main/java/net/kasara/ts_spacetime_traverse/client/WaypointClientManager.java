@@ -6,7 +6,7 @@ import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.ApplyWaypointChangeC2SPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.RegisterQuickC2SPacket;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
@@ -15,8 +15,6 @@ import java.util.*;
  */
 @Environment(EnvType.CLIENT)
 public class WaypointClientManager {
-
-    private WaypointClientManager() {}
 
     /**
      * ウェイポイントの追加・更新・削除をサーバーへ送信、キャッシュも更新
@@ -54,4 +52,6 @@ public class WaypointClientManager {
         WaypointClientCache.setAll(waypoints);
         WaypointClientCache.setQuick(quickUuid);
     }
+
+    private WaypointClientManager() {}
 }

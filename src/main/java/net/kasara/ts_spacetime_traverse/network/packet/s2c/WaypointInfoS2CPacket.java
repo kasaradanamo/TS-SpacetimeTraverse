@@ -1,48 +1,35 @@
 package net.kasara.ts_spacetime_traverse.network.packet.s2c;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
+import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 import net.kasara.ts_spacetime_traverse.client.WaypointClientManager;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Uuids;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public record WaypointInfoS2CPacket(List<WaypointData> waypoints, UUID quick) implements CustomPayload {
 
-    public static final Id<WaypointInfoS2CPacket> ID =
-            new Id<>(Identifier.of(TokorotenSlimeAPI.getModId(), "waypoints_info"));
+    public static final CustomPayload.Id<WaypointInfoS2CPacket> ID =
+            new CustomPayload.Id<>(Identifier.of(TSSpacetimeTraverse.MOD_ID, "waypoints_info"));
 
     public static final PacketCodec<RegistryByteBuf, WaypointInfoS2CPacket> CODEC =
-            PacketCodec.of(WaypointInfoS2CPacket::write, buf -> {
-                List<WaypointData> waypoints = readWaypoints(buf);
-                UUID quick = buf.readBoolean() ? buf.readUuid() : null;
-                return new WaypointInfoS2CPacket(waypoints, quick);
-            });
-
-    private static void write(WaypointInfoS2CPacket packet, RegistryByteBuf buf) {
-        buf.writeInt(packet.waypoints.size());
-        for (WaypointData wp : packet.waypoints) wp.write(buf);
-
-        buf.writeBoolean(packet.quick() != null);
-
-        if (packet.quick() != null) buf.writeUuid(packet.quick());
-    }
-
-    private static List<WaypointData> readWaypoints(RegistryByteBuf buf) {
-        int size = buf.readInt();
-        List<WaypointData> list = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) list.add(WaypointData.read(buf));
-        return list;
-    }
+            PacketCodec.tuple(
+                    PacketCodecs.collection(ArrayList::new, WaypointData.PACKET_CODEC),
+                    WaypointInfoS2CPacket::waypoints,
+                    PacketCodecs.optional(Uuids.PACKET_CODEC),
+                    p -> Optional.ofNullable(p.quick()),
+                    (waypoints, quick) -> new WaypointInfoS2CPacket(
+                            waypoints,
+                            quick.orElse(null)
+                    )
+            );
 
     @Override
     public CustomPayload.Id<? extends CustomPayload> getId() {
@@ -54,9 +41,6 @@ public record WaypointInfoS2CPacket(List<WaypointData> waypoints, UUID quick) im
     }
 
     public static void receive(WaypointInfoS2CPacket packet) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        client.execute(() -> {
-            WaypointClientManager.waypointInfo(packet.waypoints(), packet.quick());
-        });
+        WaypointClientManager.waypointInfo(packet.waypoints(), packet.quick());
     }
 }

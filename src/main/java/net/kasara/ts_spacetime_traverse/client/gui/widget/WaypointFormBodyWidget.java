@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kasara.ts_spacetime_traverse.client.data.DimensionClientCache;
 import net.kasara.ts_spacetime_traverse.client.gui.screen.WaypointFormScreen;
+import net.kasara.ts_spacetime_traverse.util.DimensionBounds;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -17,8 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.border.WorldBorder;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 @Environment(EnvType.CLIENT)
 public class WaypointFormBodyWidget extends ElementListWidget<WaypointFormBodyWidget.WaypointEntry> {
 
-    /** 親となるScreen */
+    // 親となるScreen
     private final WaypointFormScreen screen;
 
     // レイアウト用定数
@@ -252,8 +252,7 @@ public class WaypointFormBodyWidget extends ElementListWidget<WaypointFormBodyWi
          */
         @Override
         public List<? extends Selectable> selectableChildren() {
-            // nameField, xField, yField, zField, directionButton は Selectable
-            return List.of(nameField, xField, yField, zField, directionButton);
+            return List.of(nameField, dimensionField, xField, yField, zField, directionButton);
         }
 
         /**
@@ -309,19 +308,21 @@ public class WaypointFormBodyWidget extends ElementListWidget<WaypointFormBodyWi
         public boolean isValid() {
             if (nameField.getText().isBlank()) return false;
 
-            if (client.world == null) return false;
+            String dimText = dimensionField.getText();
+            if (!isValidDimensionId(dimText)) return false;
 
-            if (!isValidDimensionId(dimensionField.getText())) return false;
+            Identifier id = dimText.isBlank() ? World.OVERWORLD.getValue() : Identifier.of(dimText);
 
-            WorldBorder border = client.world.getWorldBorder();
+            DimensionBounds info = DimensionClientCache.get(id);
+            if (info == null) return false;
 
-            int minX = (int) Math.floor(border.getBoundWest());
-            int maxX = (int) Math.ceil(border.getBoundEast());
-            int minZ = (int) Math.floor(border.getBoundNorth());
-            int maxZ = (int) Math.ceil(border.getBoundSouth());
+            int minX = (int) Math.floor(info.minX());
+            int maxX = (int) Math.ceil(info.maxX());
+            int minZ = (int) Math.floor(info.minZ());
+            int maxZ = (int) Math.ceil(info.maxZ());
 
-            int minY = client.world.getBottomY();
-            int maxY = client.world.getDimension().height() + minY - 1;
+            int minY = info.minY();
+            int maxY = info.maxY();
 
             return isValidCoord(xField, minX, maxX)
                     && isValidCoord(yField, minY, maxY)
@@ -333,8 +334,14 @@ public class WaypointFormBodyWidget extends ElementListWidget<WaypointFormBodyWi
          */
         private boolean isValidCoord(TextFieldWidget field, int worldMin, int worldMax) {
             String text = field.getText();
+
+            // 空や単独マイナスは不可
             if (text.isEmpty() || text.equals("-")) return false;
 
+            // 数値形式チェック
+            if (!INT_PATTERN.matcher(text).matches()) return false;
+
+            // -000みたいなの禁止
             if (text.matches("-0+")) return false;
 
             try {
