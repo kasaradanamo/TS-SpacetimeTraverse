@@ -32,7 +32,7 @@ public class ModServerEvents {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
             // クライアントにnbt情報を伝える
-            WaypointInfoS2CPacket.send(player, ServerWaypointManager.getAll(player), ServerWaypointManager.getQuick(player));
+            WaypointInfoS2CPacket.send(player, WaypointServerManager.getAll(player), WaypointServerManager.getQuick(player));
 
             // クライアントにディメンションリストを送る
             sendDimensionList(server, player);
@@ -54,7 +54,7 @@ public class ModServerEvents {
         // プレイヤーエンティティがコピーされるとき（死亡・ディメンション移動など）
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             // Waypointデータを新しいプレイヤーに引き継ぐ
-            ServerWaypointManager.copyFrom(oldPlayer, newPlayer);
+            WaypointServerManager.copyFrom(oldPlayer, newPlayer);
         });
 
         // ログ

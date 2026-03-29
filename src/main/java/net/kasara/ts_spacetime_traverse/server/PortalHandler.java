@@ -35,7 +35,7 @@ public class PortalHandler {
         ServerWorld world = player.getEntityWorld();
 
         // Waypoint情報取得
-        WaypointData data = ServerWaypointManager.get(player, waypointUuid);
+        WaypointData data = WaypointServerManager.get(player, waypointUuid);
         if (data == null) return;
 
         // ポータル設置位置を探索
@@ -50,14 +50,14 @@ public class PortalHandler {
         PortalEntity portal = spawnPortal(player, world, pos, data, null);
 
         // アクティブな設置ポータルとして登録
-        ServerPortalManager.setActivePlacePortal(player.getUuid(), portal);
+        PortalManager.setActivePlacePortal(player.getUuid(), portal);
     }
 
     /**
      * プレイヤーが所有しているポータルを消滅アニメーション付きで削除
      */
     public static void vanishOwnedPortals(ServerPlayerEntity player) {
-        PortalEntity portal = ServerPortalManager.getActivePlacePortal(player.getUuid());
+        PortalEntity portal = PortalManager.getActivePlacePortal(player.getUuid());
         if (portal == null) return;
         if (!(player.getUuid().equals(portal.getOwnerUuid()))) return;
 
@@ -73,7 +73,7 @@ public class PortalHandler {
      * プレイヤー切断時などに、所有している全ポータルを即座に削除
      */
     public static void discardOwnedPortals(MinecraftServer server, UUID ownerUuid) {
-        ServerPortalManager.removeActivePlacePortals(ownerUuid);
+        PortalManager.removeActivePlacePortals(ownerUuid);
         for (ServerWorld world : server.getWorlds()) {
             for (PortalEntity portal : world.getEntitiesByType(ModEntities.PORTAL, p -> ownerUuid.equals(p.getOwnerUuid()))) {
                 portal.discard();
@@ -218,7 +218,7 @@ public class PortalHandler {
      * 指定位置周辺に、同一プレイヤー所有のポータルが存在するかを判定
      */
     private static boolean hasOwnerPortalNearby(ServerWorld world, Vec3d center, UUID ownerUuid, double radius) {
-        PortalEntity placePortal = ServerPortalManager.getActivePlacePortal(ownerUuid);
+        PortalEntity placePortal = PortalManager.getActivePlacePortal(ownerUuid);
         if (placePortal == null || placePortal.isRemoved()) return false;
 
         PortalEntity backPortal = placePortal.getLinkedPortal();
