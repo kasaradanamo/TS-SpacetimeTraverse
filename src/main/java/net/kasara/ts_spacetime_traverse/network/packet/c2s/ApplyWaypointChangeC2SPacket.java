@@ -2,7 +2,7 @@ package net.kasara.ts_spacetime_traverse.network.packet.c2s;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
-import net.kasara.ts_spacetime_traverse.server.ServerWaypointManager;
+import net.kasara.ts_spacetime_traverse.server.WaypointServerManager;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -35,6 +35,6 @@ public record ApplyWaypointChangeC2SPacket(WaypointData waypointData, boolean de
     }
 
     public static void receive(ApplyWaypointChangeC2SPacket packet, ServerPlayerEntity player) {
-        ServerWaypointManager.applyWaypointChange(player, packet.waypointData(), packet.delete());
+        WaypointServerManager.applyWaypointChange(player, packet.waypointData(), packet.delete());
     }
 }

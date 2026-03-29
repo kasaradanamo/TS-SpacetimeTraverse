@@ -2,7 +2,7 @@ package net.kasara.ts_spacetime_traverse.network.packet.c2s;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
-import net.kasara.ts_spacetime_traverse.server.ServerWaypointManager;
+import net.kasara.ts_spacetime_traverse.server.WaypointServerManager;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
@@ -34,6 +34,6 @@ public record RegisterQuickC2SPacket(UUID dataUuid) implements CustomPayload {
     }
 
     public static void receive(RegisterQuickC2SPacket packet, ServerPlayerEntity player) {
-        ServerWaypointManager.setQuick(player, packet.dataUuid());
+        WaypointServerManager.setQuick(player, packet.dataUuid());
     }
 }

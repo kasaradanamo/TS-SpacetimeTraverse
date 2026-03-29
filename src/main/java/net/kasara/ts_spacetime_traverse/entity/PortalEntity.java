@@ -2,7 +2,7 @@ package net.kasara.ts_spacetime_traverse.entity;
 
 import net.kasara.ts_spacetime_traverse.block.ModBlocks;
 import net.kasara.ts_spacetime_traverse.server.PortalHandler;
-import net.kasara.ts_spacetime_traverse.server.ServerPortalManager;
+import net.kasara.ts_spacetime_traverse.server.PortalManager;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -203,7 +203,7 @@ public class PortalEntity extends Entity {
         }
 
         // サーバー管理リストから除外
-        ServerPortalManager.removeActivePlacePortals(getOwnerUuid());
+        PortalManager.removeActivePlacePortals(getOwnerUuid());
     }
 
     public boolean isVanishing() {
