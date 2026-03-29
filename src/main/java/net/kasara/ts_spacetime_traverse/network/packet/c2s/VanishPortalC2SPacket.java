@@ -3,22 +3,22 @@ package net.kasara.ts_spacetime_traverse.network.packet.c2s;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 import net.kasara.ts_spacetime_traverse.server.PortalHandler;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
-public record VanishPortalC2SPacket() implements CustomPayload {
+public record VanishPortalC2SPacket() implements CustomPacketPayload {
 
-    public static final CustomPayload.Id<VanishPortalC2SPacket> ID =
-            new CustomPayload.Id<>(Identifier.of(TSSpacetimeTraverse.MOD_ID, "vanish_portal"));
+    public static final CustomPacketPayload.Type<VanishPortalC2SPacket> ID =
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "vanish_portal"));
 
-    public static final PacketCodec<RegistryByteBuf, VanishPortalC2SPacket> CODEC =
-            PacketCodec.unit(new VanishPortalC2SPacket());
+    public static final StreamCodec<RegistryFriendlyByteBuf, VanishPortalC2SPacket> CODEC =
+            StreamCodec.unit(new VanishPortalC2SPacket());
 
     @Override
-    public CustomPayload.Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
@@ -26,7 +26,7 @@ public record VanishPortalC2SPacket() implements CustomPayload {
         ClientPlayNetworking.send(new VanishPortalC2SPacket());
     }
 
-    public void receive(ServerPlayerEntity player) {
+    public void receive(ServerPlayer player) {
         PortalHandler.vanishOwnedPortals(player);
     }
 }

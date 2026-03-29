@@ -6,7 +6,7 @@ import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.ApplyWaypointChangeC2SPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.RegisterQuickC2SPacket;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 

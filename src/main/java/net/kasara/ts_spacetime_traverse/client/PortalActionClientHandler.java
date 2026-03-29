@@ -8,12 +8,12 @@ import net.kasara.ts_spacetime_traverse.client.util.ClientAdvancementUtil;
 import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.PlacePortalC2SPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.VanishPortalC2SPacket;
-import net.kasara.ts_spacetime_traverse.client.option.ModKeyBindings;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.kasara.ts_spacetime_traverse.client.option.ModKeyMappings;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -31,24 +31,24 @@ public class PortalActionClientHandler {
     /**
      * キーアクションを処理
      */
-    public static void handlePortalAction(MinecraftClient client) {
-        PlayerEntity player = client.player;
+    public static void handlePortalAction(Minecraft minecraft) {
+        Player player = minecraft.player;
         if (player == null) return;
 
         if (!pushKey()) return; // 押された瞬間のみtrue
 
         // 対応する実績を解除してない場合使用不可
-        if (!ClientAdvancementUtil.hasUnlockedSpacetimeAdvancement(client)) return;
+        if (!ClientAdvancementUtil.hasUnlockedSpacetimeAdvancement(minecraft)) return;
 
         // Ctrlキーが押されてるかどうか
-        boolean ctrlPressed = GLFW.glfwGetKey(client.getWindow().getHandle(),
+        boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
                 GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
 
         if (ctrlPressed) {
-            client.setScreen(new PortalActionScreen()); // GUIを開く
+            minecraft.setScreen(new PortalActionScreen()); // GUIを開く
         } else {
             // 通常押下:視線上にポータルがあれば消去、なければ設置
-            PortalEntity lookedPortal = getLookedPortal(client, player);
+            PortalEntity lookedPortal = getLookedPortal(minecraft, player);
             if (lookedPortal != null) {
                 VanishPortalC2SPacket.send();
             } else {
@@ -62,7 +62,7 @@ public class PortalActionClientHandler {
      * @return 押されてたらtrue、押されてなかったらfalse
      */
     private static boolean pushKey() {
-        boolean isPressed = ModKeyBindings.PORTAL_ACTION.isPressed();
+        boolean isPressed = ModKeyMappings.PORTAL_ACTION.isDown();
 
         if (isPressed && !keyPressed) {
             keyPressed = true;
@@ -77,28 +77,28 @@ public class PortalActionClientHandler {
     /**
      * プレイヤーの視線上にある自分が保有するポータルを取得
      *
-     * @param client マインクラフトインスタンス
-     * @param player 視線判定を行うプレイヤー
+     * @param minecraft マインクラフトインスタンス
+     * @param player    視線判定を行うプレイヤー
      * @return 視線上のポータルエンティティ(なければnull)
      */
-    private static @Nullable PortalEntity getLookedPortal(MinecraftClient client, PlayerEntity player) {
-        if (client.world == null) return null;
+    private static @Nullable PortalEntity getLookedPortal(Minecraft minecraft, Player player) {
+        if (minecraft.level == null) return null;
 
         double maxDistance = 64.0;
 
         // 視線の開始点（カメラ位置）と方向ベクトル
-        Vec3d start = player.getCameraPosVec(1.0f);
-        Vec3d direction = player.getRotationVec(1.0f);
-        Vec3d end = start.add(direction.multiply(maxDistance));
+        Vec3 start = player.getEyePosition();
+        Vec3 direction = player.getViewVector(1.0f);
+        Vec3 end = start.add(direction.scale(maxDistance));
 
         // 視線方向に伸ばした範囲でポータルを検索
-        Box searchBox = player.getBoundingBox().stretch(direction.multiply(maxDistance)).expand(0);
+        AABB searchBox = player.getBoundingBox().expandTowards(direction.scale(maxDistance)).inflate(0);
 
         // 自分がオーナーのポータルのみを対象
-        List<PortalEntity> portals = client.world.getEntitiesByClass(
+        List<PortalEntity> portals = minecraft.level.getEntitiesOfClass(
                 PortalEntity.class,
                 searchBox,
-                portal -> player.getUuid().equals(portal.getOwnerUuid())
+                portal -> player.getUUID().equals(portal.getOwnerUuid())
         );
         if (portals.isEmpty()) return null;
 
@@ -110,13 +110,13 @@ public class PortalActionClientHandler {
             double nearestDistSq = Double.MAX_VALUE;
 
             for (PortalEntity portal : portals) {
-                Box portalBox = portal.getBoundingBox().expand(expand);
+                AABB portalBox = portal.getBoundingBox().inflate(expand);
 
                 // 視線レイとポータルの当たり判定をチェック
-                Optional<Vec3d> hit = portalBox.raycast(start, end);
+                Optional<Vec3> hit = portalBox.clip(start, end);
                 if (hit.isPresent()) {
                     // 一番近いヒット点をもつポータルを選択
-                    double distSq = hit.get().squaredDistanceTo(start);
+                    double distSq = hit.get().distanceToSqr(start);
                     if (distSq < nearestDistSq) {
                         nearestDistSq = distSq;
                         nearestPortal = portal;
@@ -138,10 +138,10 @@ public class PortalActionClientHandler {
      * @param player メッセージ対象のプレイヤー
      * @param waypointUuid ポータルに保存するWaypointデータのUUID
      */
-    public static void placePortal(PlayerEntity player, UUID waypointUuid) {
+    public static void placePortal(Player player, UUID waypointUuid) {
         // Waypoint未指定の場合はエラーメッセージ表示
         if (waypointUuid == null) {
-            player.sendMessage(Text.translatable("message.tokorotenslime.not_place_portal"), true);
+            player.sendOverlayMessage(Component.translatable("message.tokorotenslime.not_place_portal"));
             return;
         }
         // サーバーに設置要求

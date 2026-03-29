@@ -1,11 +1,11 @@
 package net.kasara.ts_spacetime_traverse.util;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
@@ -26,12 +26,12 @@ public class WaypointNbtUtil {
     /**
      * WaypointData を NbtCompound に変換
      */
-    public static NbtCompound toNbt(WaypointData data) {
-        NbtCompound nbt = new NbtCompound();
+    public static CompoundTag toNbt(WaypointData data) {
+        CompoundTag nbt = new CompoundTag();
 
         nbt.putString(UUID_KEY, data.uuid().toString());
         nbt.putString(NAME, data.name());
-        nbt.putString(DIM, data.dimension().getValue().toString());
+        nbt.putString(DIM, data.dimension().identifier().toString());
 
         // 座標を整数で保存
         nbt.putInt(X, data.blockPos().getX());
@@ -45,12 +45,12 @@ public class WaypointNbtUtil {
     /**
      * NbtCompound から WaypointData に復元
      */
-    public static WaypointData fromNbt(NbtCompound nbt) {
+    public static WaypointData fromNbt(CompoundTag nbt) {
         UUID uuid = UUID.fromString(nbt.getString(UUID_KEY).orElseThrow());
         String name = nbt.getString(NAME).orElse("");
-        RegistryKey<World> dim =
-                RegistryKey.of(RegistryKeys.WORLD,
-                        Identifier.tryParse(nbt.getString(DIM).orElse("minecraft:overworld"))
+        ResourceKey<Level> dim =
+                ResourceKey.create(Registries.DIMENSION,
+                        Identifier.parse(nbt.getString(DIM).orElse("minecraft:overworld"))
                 );
 
         BlockPos pos = new BlockPos(

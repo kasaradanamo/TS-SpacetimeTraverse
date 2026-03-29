@@ -1,36 +1,36 @@
 package net.kasara.ts_spacetime_traverse.block;
 
 import net.kasara.ts_spacetime_traverse.block.entity.VoidBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.TransparentBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.TransparentBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * ポータルくぐった際足元何もなかった時に出てくる一時ブロック
+ * ポータルくぐった際足元に何もなかった時に出てくる一時ブロック
  */
-public class VoidBlock extends TransparentBlock implements BlockEntityProvider {
+public class VoidBlock extends TransparentBlock implements EntityBlock {
 
-    public VoidBlock(Settings settings) {
-        super(settings);
+    public VoidBlock(Properties pros) {
+        super(pros);
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new VoidBlockEntity(pos, state);
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         // クライアント側では処理不要
-        return world.isClient() ? null : (w, p, s, be) -> {
+        return level.isClientSide() ? null : (l, p, s, be) -> {
             if (be instanceof VoidBlockEntity voidBe) {
                 // サーバー側でVoidBlockEntityのTickを呼び出す
-                VoidBlockEntity.tick(w, p, s, voidBe);
+                VoidBlockEntity.tick(l, p, s, voidBe);
             }
         };
     }

@@ -3,7 +3,7 @@ package net.kasara.ts_spacetime_traverse.client.data;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
@@ -67,7 +67,7 @@ public final class WaypointClientCache {
 
     /**
      * ウェイポイントを追加または更新
-     * 既存 UUIDがあれば上書き
+     * 既存UUIDがあれば上書き
      * 最初の追加の場合は自動でクイックに設定
      *
      * @param data 追加・更新する WaypointData
@@ -81,7 +81,7 @@ public final class WaypointClientCache {
     }
 
     /**
-     * UUID に対応するウェイポイントを削除
+     * UUIDに対応するウェイポイントを削除
      * クイックと一致していれば nullにリセット
      *
      * @param uuid 削除対象のUUID

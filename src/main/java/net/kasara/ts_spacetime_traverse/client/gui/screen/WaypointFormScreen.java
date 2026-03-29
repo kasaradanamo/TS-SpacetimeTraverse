@@ -6,10 +6,13 @@ import net.kasara.ts_spacetime_traverse.client.WaypointClientManager;
 import net.kasara.ts_spacetime_traverse.client.gui.widget.WaypointFormBodyWidget;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.kasara.ts_spacetime_traverse.util.WaypointDataUtil;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.*;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,17 +37,16 @@ public class WaypointFormScreen extends Screen {
     private final Mode mode;
 
     // 編集対象のデータ(登録時はnull)
-    @Nullable
     private final WaypointData data;
 
     // 画面全体のレイアウト
-    public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this, 8 + 9 + 8 + 4);
+    public final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 4);
 
     // 入力フォームウィジェット
     private WaypointFormBodyWidget body;
 
     // 登録/保存ボタン
-    private ButtonWidget confirmButton;
+    private Button confirmButton;
 
     // 画面動作モード
     public enum Mode {
@@ -61,7 +63,7 @@ public class WaypointFormScreen extends Screen {
      */
     public WaypointFormScreen(Screen parent, Mode mode, @Nullable WaypointData data) {
         // タイトルはモードで切替
-        super(Text.translatable(
+        super(Component.translatable(
                 mode == Mode.REGISTER
                         ? "screen.tokorotenslime.waypoint_register.title"
                         : "screen.tokorotenslime.waypoint_edit.title"
@@ -95,10 +97,10 @@ public class WaypointFormScreen extends Screen {
         this.initFooter();
 
         // layout に登録された widget をまとめて Screen に追加
-        this.layout.forEachChild(this::addDrawableChild);
+        this.layout.visitWidgets(this::addRenderableWidget);
 
         // 画面サイズに応じて位置計算
-        this.refreshWidgetPositions();
+        this.repositionElements();
 
         // 最初に名前入力欄へフォーカスを当てる
         this.setInitialFocusToName();
@@ -108,7 +110,7 @@ public class WaypointFormScreen extends Screen {
      * 上部：タイトル
      */
     private void initHeader() {
-        this.layout.addHeader(this.title, this.textRenderer);
+        this.layout.addTitleHeader(this.title, this.font);
     }
 
     /**
@@ -117,21 +119,21 @@ public class WaypointFormScreen extends Screen {
      * data がある  → 編集用
      */
     private void initBody() {
-        this.body = this.layout.addBody(new WaypointFormBodyWidget(this.client, this, data));
+        this.body = this.layout.addToContents(new WaypointFormBodyWidget(this.minecraft, this, data));
     }
 
     /**
      * 下部：ボタン類
      */
     private void initFooter() {
-        GridWidget grid = this.layout.addFooter(new GridWidget().setColumnSpacing(8));
+        GridLayout grid = this.layout.addToFooter(new GridLayout().columnSpacing(8));
 
-        grid.getMainPositioner().alignHorizontalCenter();
-        GridWidget.Adder adder = grid.createAdder(2);
+        grid.defaultCellSetting().alignHorizontallyCenter();
+        GridLayout.RowHelper rowHelper = grid.createRowHelper(2);
 
         // 登録/保存ボタン
-        confirmButton = ButtonWidget.builder(
-                Text.translatable(
+        confirmButton = Button.builder(
+                Component.translatable(
                         mode == Mode.REGISTER
                                 ? "screen.tokorotenslime.waypoint_register.title"
                                 : "screen.tokorotenslime.waypoint_edit.save"
@@ -165,17 +167,17 @@ public class WaypointFormScreen extends Screen {
                     }
 
                     // 親画面へ戻る
-                    this.client.setScreen(this.parent);
+                    this.minecraft.setScreen(this.parent);
                 }
         ).width(120).build();
         confirmButton.active = false;
-        adder.add(confirmButton);
+        rowHelper.addChild(confirmButton);
 
         // 戻るボタン
-        adder.add(
-                ButtonWidget.builder(
-                        ScreenTexts.BACK,
-                        button -> this.close()
+        rowHelper.addChild(
+                Button.builder(
+                        CommonComponents.GUI_BACK,
+                        button -> this.onClose()
                 ).width(120).build()
         );
     }
@@ -184,26 +186,26 @@ public class WaypointFormScreen extends Screen {
      * レイアウト位置再計算
      */
     @Override
-    protected void refreshWidgetPositions() {
+    protected void repositionElements() {
         if (this.body != null) {
-            this.body.position(this.width, this.layout);
+            this.body.updateSize(this.width, this.layout);
         }
-        this.layout.refreshPositions();
+        this.layout.arrangeElements();
     }
 
     /**
      * 画面を閉じるときは親画面へ戻る
      */
     @Override
-    public void close() {
-        this.client.setScreen(this.parent);
+    public void onClose() {
+        this.minecraft.setScreen(this.parent);
     }
 
     /**
      * ゲームを停止しない
      */
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -233,7 +235,7 @@ public class WaypointFormScreen extends Screen {
     private void setInitialFocusToName() {
         if (this.body == null) return;
 
-        TextFieldWidget nameField = this.body.getNameField();
+        EditBox nameField = this.body.getNameField();
         if (nameField == null) return;
 
         this.setInitialFocus(nameField);

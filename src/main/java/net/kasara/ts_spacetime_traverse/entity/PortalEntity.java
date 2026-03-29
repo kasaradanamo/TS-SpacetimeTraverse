@@ -2,29 +2,29 @@ package net.kasara.ts_spacetime_traverse.entity;
 
 import net.kasara.ts_spacetime_traverse.block.ModBlocks;
 import net.kasara.ts_spacetime_traverse.server.PortalHandler;
-import net.kasara.ts_spacetime_traverse.server.ServerPortalManager;
+import net.kasara.ts_spacetime_traverse.server.PortalManager;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ChunkTicketType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.TeleportTarget;
-import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 import java.util.UUID;
@@ -41,117 +41,117 @@ public class PortalEntity extends Entity {
     public static final int ANIMATION_TICKS = (int) (20 * 1.2f);
 
     // 所有者情報
-    private static final TrackedData<String> OWNER_UUID = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.STRING);
-    private static final TrackedData<String> OWNER_NAME = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.STRING);
+    private static final EntityDataAccessor<String> OWNER_UUID = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.STRING);
 
     // ウェイポイント情報
-    private static final TrackedData<String> WAYPOINT_UUID = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.STRING);
-    private static final TrackedData<String> WAYPOINT_NAME = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.STRING);
+    private static final EntityDataAccessor<String> WAYPOINT_UUID = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> WAYPOINT_NAME = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.STRING);
 
     // 転送先情報
-    private static final TrackedData<String> TARGET_DIMENSION_NAME = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.STRING);
-    private static final TrackedData<Integer> TARGET_X = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<Integer> TARGET_Y = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<Integer> TARGET_Z = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<Integer> TARGET_YAW = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final EntityDataAccessor<String> TARGET_DIMENSION_NAME = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Integer> TARGET_X = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> TARGET_Y = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> TARGET_Z = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> TARGET_YAW = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.INT);
 
     // アニメーション制御
-    private static final TrackedData<Long> SPAWN_TICK = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.LONG);
-    private static final TrackedData<Long> VANISH_START_TICK = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.LONG);
-    private static final TrackedData<Float> VANISH_START_SCALE = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final EntityDataAccessor<Long> SPAWN_TICK = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Long> VANISH_START_TICK = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Float> VANISH_START_SCALE = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.FLOAT);
 
     // リンクポータル(返ってこれるポータル)
-    private static final TrackedData<String> LINKED_PORTAL_UUID = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.STRING);
-    private static final TrackedData<Boolean> IS_PLACE_PORTAL = DataTracker.registerData(PortalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final EntityDataAccessor<String> LINKED_PORTAL_UUID = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Boolean> IS_PLACE_PORTAL = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.BOOLEAN);
 
     // チャンクロード維持用
     private long chunkTicketExpiryTicks = 0L;
 
-    public PortalEntity(EntityType<?> type, World world) {
-        super(type, world);
-        noClip = true;  // 物理衝突を無効化
+    public PortalEntity(EntityType<?> type, Level level) {
+        super(type, level);
+        noPhysics = true;  // 物理衝突を無効化
     }
 
     /**
      * DataTracker初期化
      */
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_UUID, "");
-        builder.add(WAYPOINT_UUID, "");
-        builder.add(TARGET_DIMENSION_NAME, "minecraft:overworld");
-        builder.add(TARGET_X, 0);
-        builder.add(TARGET_Y, 0);
-        builder.add(TARGET_Z, 0);
-        builder.add(TARGET_YAW, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+        entityData.define(OWNER_UUID, "");
+        entityData.define(WAYPOINT_UUID, "");
+        entityData.define(TARGET_DIMENSION_NAME, "minecraft:overworld");
+        entityData.define(TARGET_X, 0);
+        entityData.define(TARGET_Y, 0);
+        entityData.define(TARGET_Z, 0);
+        entityData.define(TARGET_YAW, 0);
 
-        builder.add(OWNER_NAME, "");
-        builder.add(WAYPOINT_NAME, "");
+        entityData.define(OWNER_NAME, "");
+        entityData.define(WAYPOINT_NAME, "");
 
-        builder.add(SPAWN_TICK, 0L);
-        builder.add(VANISH_START_TICK, -1L);
-        builder.add(VANISH_START_SCALE, 1.0f);
+        entityData.define(SPAWN_TICK, 0L);
+        entityData.define(VANISH_START_TICK, -1L);
+        entityData.define(VANISH_START_SCALE, 1.0f);
 
-        builder.add(LINKED_PORTAL_UUID, "");
-        builder.add(IS_PLACE_PORTAL, true);
+        entityData.define(LINKED_PORTAL_UUID, "");
+        entityData.define(IS_PLACE_PORTAL, true);
     }
 
     /**
      * 永続化(NBT)
      */
     @Override
-    protected void readCustomData(ReadView view) {
-        dataTracker.set(OWNER_UUID, view.getString("OwnerUUID", ""));
-        dataTracker.set(WAYPOINT_UUID, view.getString("WaypointUUID", ""));
-        dataTracker.set(TARGET_DIMENSION_NAME, view.getString("TargetDimension", "minecraft:overworld"));
-        dataTracker.set(TARGET_X, view.getInt("TargetX", 0));
-        dataTracker.set(TARGET_Y, view.getInt("TargetY", 0));
-        dataTracker.set(TARGET_Z, view.getInt("TargetZ", 0));
-        dataTracker.set(TARGET_YAW, view.getInt("TargetYaw", 0));
+    protected void readAdditionalSaveData(ValueInput input) {
+        entityData.set(OWNER_UUID, input.getString("OwnerUUID").orElse(""));
+        entityData.set(WAYPOINT_UUID, input.getString("WaypointUUID").orElse(""));
+        entityData.set(TARGET_DIMENSION_NAME, input.getString("TargetDimension").orElse("minecraft:overworld"));
+        entityData.set(TARGET_X, input.getInt("TargetX").orElse(0));
+        entityData.set(TARGET_Y, input.getInt("TargetY").orElse(0));
+        entityData.set(TARGET_Z, input.getInt("TargetZ").orElse(0));
+        entityData.set(TARGET_YAW, input.getInt("TargetYaw").orElse(0));
 
-        dataTracker.set(OWNER_NAME, view.getString("OwnerName", ""));
-        dataTracker.set(WAYPOINT_NAME, view.getString("WaypointName", ""));
+        entityData.set(OWNER_NAME, input.getString("OwnerName").orElse(""));
+        entityData.set(WAYPOINT_NAME, input.getString("WaypointName").orElse(""));
     }
 
     @Override
-    protected void writeCustomData(WriteView view) {
-        view.putString("OwnerUUID", dataTracker.get(OWNER_UUID));
-        view.putString("WaypointUUID", dataTracker.get(WAYPOINT_UUID));
-        view.putString("TargetDimension", dataTracker.get(TARGET_DIMENSION_NAME));
-        view.putInt("TargetX", dataTracker.get(TARGET_X));
-        view.putInt("TargetY", dataTracker.get(TARGET_Y));
-        view.putInt("TargetZ", dataTracker.get(TARGET_Z));
-        view.putInt("TargetYaw", dataTracker.get(TARGET_YAW));
+    protected void addAdditionalSaveData(ValueOutput output) {
+        output.putString("OwnerUUID", entityData.get(OWNER_UUID));
+        output.putString("WaypointUUID", entityData.get(WAYPOINT_UUID));
+        output.putString("TargetDimension", entityData.get(TARGET_DIMENSION_NAME));
+        output.putInt("TargetX", entityData.get(TARGET_X));
+        output.putInt("TargetY", entityData.get(TARGET_Y));
+        output.putInt("TargetZ", entityData.get(TARGET_Z));
+        output.putInt("TargetYaw", entityData.get(TARGET_YAW));
 
-        view.putString("OwnerName", dataTracker.get(OWNER_NAME));
-        view.putString("WaypointName", dataTracker.get(WAYPOINT_NAME));
+        output.putString("OwnerName", entityData.get(OWNER_NAME));
+        output.putString("WaypointName", entityData.get(WAYPOINT_NAME));
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        if (!(getEntityWorld() instanceof ServerWorld serverWorld)) return;
+        if (!(level() instanceof ServerLevel serverLevel)) return;
 
-        long worldTime = serverWorld.getTime();
+        long worldTime = serverLevel.getGameTime();
 
         // 初回 tick で spawnTick を確定
-        if (dataTracker.get(SPAWN_TICK) == 0L) {
-            dataTracker.set(SPAWN_TICK, worldTime);
+        if (entityData.get(SPAWN_TICK) == 0L) {
+            entityData.set(SPAWN_TICK, worldTime);
         }
 
         // ポータル内に侵入したエンティティを検出して転送
-        String dimension = dataTracker.get(TARGET_DIMENSION_NAME);
+        String dimension = entityData.get(TARGET_DIMENSION_NAME);
         if (!dimension.isEmpty()) {
-            ServerWorld targetWorld = getEntityWorld().getServer()
-                    .getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(dimension)));
+            ServerLevel targetLevel = level().getServer()
+                    .getLevel(ResourceKey.create(Registries.DIMENSION, Identifier.parse(dimension)));
 
-            if (targetWorld != null) {
-                Box portalBox = this.getBoundingBox();
+            if (targetLevel != null) {
+                AABB portalBox = this.getBoundingBox();
 
-                for (Entity entity : getEntityWorld().getOtherEntities(this, portalBox.expand(3))) {
+                for (Entity entity : level().getEntities(this, portalBox.inflate(3))) {
                     if (!(entity instanceof PortalEntity) && shouldTeleport(entity, portalBox)) {
-                        teleport(entity, targetWorld);
+                        teleport(entity, targetLevel);
                     }
                 }
             }
@@ -159,12 +159,12 @@ public class PortalEntity extends Entity {
 
         // チャンクのアンロード防止
         if (--chunkTicketExpiryTicks <= 0L) {
-            serverWorld.getChunkManager().addTicket(
-                    ChunkTicketType.ENDER_PEARL,
-                    getChunkPos(),
+            serverLevel.getChunkSource().addTicketWithRadius(
+                    TicketType.ENDER_PEARL,
+                    chunkPosition(),
                     3
             );
-            chunkTicketExpiryTicks = ChunkTicketType.ENDER_PEARL.expiryTicks();
+            chunkTicketExpiryTicks = TicketType.ENDER_PEARL.timeout();
         }
 
         // 生存時間終了前に消滅アニメーション開始
@@ -193,8 +193,8 @@ public class PortalEntity extends Entity {
         long spawnTick = getSpawnTick();
         currentScale = spawnTick <= 0 ? 0f : Math.min((worldTime - spawnTick) / (float) ANIMATION_TICKS, 1f);
 
-        dataTracker.set(VANISH_START_SCALE, currentScale);
-        dataTracker.set(VANISH_START_TICK, worldTime);
+        entityData.set(VANISH_START_SCALE, currentScale);
+        entityData.set(VANISH_START_TICK, worldTime);
 
         // リンク先ポータルも同時に消滅
         PortalEntity linkedPortal = getLinkedPortal();
@@ -203,36 +203,36 @@ public class PortalEntity extends Entity {
         }
 
         // サーバー管理リストから除外
-        ServerPortalManager.removeActivePlacePortals(getOwnerUuid());
+        PortalManager.removeActivePlacePortals(getOwnerUuid());
     }
 
     public boolean isVanishing() {
-        return dataTracker.get(VANISH_START_TICK) >= 0;
+        return entityData.get(VANISH_START_TICK) >= 0;
     }
 
     /**
      * ポータルに入るかの判定
      */
-    private boolean shouldTeleport(Entity entity, Box portalBox) {
-        //接触判定
+    private boolean shouldTeleport(Entity entity, AABB portalBox) {
+        // 接触判定
         if (entity.getBoundingBox().intersects(portalBox)) {
             return true;
         }
 
-        //高速通過判定
-        Vec3d prevPos = new Vec3d(entity.lastX, entity.lastY, entity.lastZ);
-        Vec3d currentPos = entity.getEntityPos();
+        // 高速通過判定
+        Vec3 prevPos = new Vec3(entity.xOld, entity.yOld, entity.zOld);
+        Vec3 currentPos = entity.position();
 
-        return portalBox.raycast(prevPos, currentPos).isPresent();
+        return portalBox.clip(prevPos, currentPos).isPresent();
     }
 
     /**
      * ワープ処理
      *
      * @param entity 入ったEntity
-     * @param targetWorld 行き先のサーバーワールド
+     * @param targetLevel 行き先のサーバーワールド
      */
-    private void teleport(Entity entity, ServerWorld targetWorld) {
+    private void teleport(Entity entity, ServerLevel targetLevel) {
         // ポータル自身は転送しない
         if (entity instanceof PortalEntity) return;
 
@@ -242,34 +242,34 @@ public class PortalEntity extends Entity {
         double y = targetBlockPos.getY();
         double z = targetBlockPos.getZ() + 0.5;
         float yaw = getTargetYaw();
-        float pitch = entity.getPitch();
-        Vec3d motion = entity.getVelocity().rotateY((float) Math.toRadians(yaw - entity.getYaw()));
+        float pitch = entity.getXRot();
+        Vec3 motion = entity.getDeltaMovement().yRot((float) Math.toRadians(yaw - entity.getYRot()));
 
         // 足場用の VoidBlock を配置
-        if (entity instanceof LivingEntity le && !le.isGliding()) {
-            tryPlaceVoidBlock(targetWorld, targetBlockPos);
-            motion = new Vec3d(0, 0, 0);
+        if (entity instanceof LivingEntity le && !le.isFallFlying()) {
+            tryPlaceVoidBlock(targetLevel, targetBlockPos);
+            motion = new Vec3(0, 0, 0);
         }
 
         // プレイヤーは同期
-        if (entity instanceof ServerPlayerEntity player) {
-            player.networkHandler.requestTeleport(x, y, z, yaw, pitch);
-            player.velocityDirty = true;
+        if(entity instanceof ServerPlayer player) {
+            player.connection.teleport(x, y, z, yaw, pitch);
+            player.hurtMarked = true;
         }
 
-        TeleportTarget target = new TeleportTarget(
-                targetWorld,
-                new Vec3d(x, y, z),
+        TeleportTransition transition = new TeleportTransition(
+                targetLevel,
+                new Vec3(x, y, z),
                 motion,
                 yaw,
                 pitch,
                 false,
                 false,
                 Set.of(),
-                TeleportTarget.ADD_PORTAL_CHUNK_TICKET
+                TeleportTransition.PLACE_PORTAL_TICKET
         );
 
-        entity.teleportTo(target);
+        entity.teleport(transition);
         entity.fallDistance = 0.0f;
 
         // サーバー側フック処理
@@ -280,96 +280,96 @@ public class PortalEntity extends Entity {
      * 転送先直下にVoidBlockを配置する
      * 水や空気の場合のみ設置
      */
-    private void tryPlaceVoidBlock(ServerWorld world, BlockPos tpTargetPos) {
-        BlockPos placePos = tpTargetPos.down(1);
+    private void tryPlaceVoidBlock(ServerLevel level, BlockPos tpTargetPos) {
+        BlockPos placePos = tpTargetPos.below(1);
 
         for (int i = 1; i < 4; i++) {
-            BlockPos checkPos = tpTargetPos.down(i);
-            var state = world.getBlockState(checkPos);
+            BlockPos checkPos = tpTargetPos.below(i);
+            var state = level.getBlockState(checkPos);
 
             if (!state.isAir() && state.getFluidState().isEmpty()) return;
 
             if (!state.getFluidState().isEmpty()) {
-                world.setBlockState(placePos, ModBlocks.VOID_BLOCK.getDefaultState());
+                level.setBlock(placePos, ModBlocks.VOID_BLOCK.defaultBlockState(), 3);
                 return;
             }
         }
-        world.setBlockState(placePos, ModBlocks.VOID_BLOCK.getDefaultState());
+        level.setBlock(placePos, ModBlocks.VOID_BLOCK.defaultBlockState(), 3);
     }
 
-    public void setOwner(ServerPlayerEntity player) {
-        dataTracker.set(OWNER_UUID, player.getUuid().toString());
-        dataTracker.set(OWNER_NAME, player.getName().getString());
+    public void setOwner(ServerPlayer player) {
+        entityData.set(OWNER_UUID, player.getStringUUID());
+        entityData.set(OWNER_NAME, player.getName().getString());
     }
 
     public void setOwner(UUID ownerUuid, String ownerName) {
-        dataTracker.set(OWNER_UUID, ownerUuid.toString());
-        dataTracker.set(OWNER_NAME, ownerName);
+        entityData.set(OWNER_UUID, ownerUuid.toString());
+        entityData.set(OWNER_NAME, ownerName);
     }
 
     public void setWaypoint(WaypointData waypoint) {
-        dataTracker.set(WAYPOINT_UUID, waypoint.uuid().toString());
-        dataTracker.set(WAYPOINT_NAME, waypoint.name());
-        dataTracker.set(TARGET_DIMENSION_NAME, waypoint.dimension().getValue().toString());
-        dataTracker.set(TARGET_X, waypoint.blockPos().getX());
-        dataTracker.set(TARGET_Y, waypoint.blockPos().getY());
-        dataTracker.set(TARGET_Z, waypoint.blockPos().getZ());
-        dataTracker.set(TARGET_YAW, waypoint.yaw());
+        entityData.set(WAYPOINT_UUID, waypoint.uuid().toString());
+        entityData.set(WAYPOINT_NAME, waypoint.name());
+        entityData.set(TARGET_DIMENSION_NAME, waypoint.dimension().identifier().toString());
+        entityData.set(TARGET_X, waypoint.blockPos().getX());
+        entityData.set(TARGET_Y, waypoint.blockPos().getY());
+        entityData.set(TARGET_Z, waypoint.blockPos().getZ());
+        entityData.set(TARGET_YAW, waypoint.yaw());
     }
 
     public void setLinkPortal(PortalEntity other, boolean isPlace) {
-        dataTracker.set(LINKED_PORTAL_UUID, other.getUuid().toString());
-        dataTracker.set(IS_PLACE_PORTAL, isPlace);
+        entityData.set(LINKED_PORTAL_UUID, other.getStringUUID());
+        entityData.set(IS_PLACE_PORTAL, isPlace);
     }
 
     public UUID getOwnerUuid() {
-        return UUID.fromString(dataTracker.get(OWNER_UUID));
+        return UUID.fromString(entityData.get(OWNER_UUID));
     }
 
     public UUID getWaypointUuid() {
-        return UUID.fromString(dataTracker.get(WAYPOINT_UUID));
+        return UUID.fromString(entityData.get(WAYPOINT_UUID));
     }
 
-    public RegistryKey<World> getTargetDimension() {
-        return RegistryKey.of(RegistryKeys.WORLD, Identifier.of(dataTracker.get(TARGET_DIMENSION_NAME)));
+    public ResourceKey<Level> getTargetDimension() {
+        return ResourceKey.create(Registries.DIMENSION, Identifier.parse(entityData.get(TARGET_DIMENSION_NAME)));
     }
 
     public BlockPos getTargetBlockPos() {
-        return new BlockPos(dataTracker.get(TARGET_X), dataTracker.get(TARGET_Y), dataTracker.get(TARGET_Z));
+        return new BlockPos(entityData.get(TARGET_X), entityData.get(TARGET_Y), entityData.get(TARGET_Z));
     }
 
     public int getTargetYaw() {
-        return dataTracker.get(TARGET_YAW);
+        return entityData.get(TARGET_YAW);
     }
 
     public String getOwnerName() {
-        return dataTracker.get(OWNER_NAME);
+        return entityData.get(OWNER_NAME);
     }
 
     public String getWaypointName() {
-        return dataTracker.get(WAYPOINT_NAME);
+        return entityData.get(WAYPOINT_NAME);
     }
 
     public String getTargetPosText() {
-        return String.format("XYZ: %s / %s / %s", dataTracker.get(TARGET_X), dataTracker.get(TARGET_Y), dataTracker.get(TARGET_Z));
+        return String.format("XYZ: %s / %s / %s", entityData.get(TARGET_X), entityData.get(TARGET_Y), entityData.get(TARGET_Z));
     }
 
     public Long getSpawnTick() {
-        return dataTracker.get(SPAWN_TICK);
+        return entityData.get(SPAWN_TICK);
     }
 
     public Long getVanishStartTick() {
-        return dataTracker.get(VANISH_START_TICK);
+        return entityData.get(VANISH_START_TICK);
     }
 
     public float getVanishStartScale() {
-        return dataTracker.get(VANISH_START_SCALE);
+        return entityData.get(VANISH_START_SCALE);
     }
 
     public @Nullable PortalEntity getLinkedPortal() {
-        String uuidStr = dataTracker.get(LINKED_PORTAL_UUID);
+        String uuidStr = entityData.get(LINKED_PORTAL_UUID);
         if (uuidStr.isEmpty()) return null;
-        return (PortalEntity) getEntityWorld().getServer().getWorld(getTargetDimension()).getEntity(UUID.fromString(uuidStr));
+        return (PortalEntity) level().getServer().getLevel(getTargetDimension()).getEntity(UUID.fromString(uuidStr));
     }
 
     public float getAnimationDuration() {
@@ -377,14 +377,14 @@ public class PortalEntity extends Entity {
     }
 
     public boolean getIsPlacePortal() {
-        return dataTracker.get(IS_PLACE_PORTAL);
+        return entityData.get(IS_PLACE_PORTAL);
     }
 
     /**
      * ダメージを受けない
      */
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
         return false;
     }
 
@@ -392,11 +392,11 @@ public class PortalEntity extends Entity {
      * 当たり判定
      */
     @Override
-    protected Box calculateDefaultBoundingBox(Vec3d pos) {
+    protected AABB makeBoundingBox(Vec3 pos) {
         double width = 0.5;
         double height = 0.5;
 
-        return new Box(
+        return new AABB(
                 pos.x - width / 2, pos.y + 1 + height / 2, pos.z - width / 2,
                 pos.x + width / 2, pos.y + 1.5 + height / 2, pos.z + width / 2
         );

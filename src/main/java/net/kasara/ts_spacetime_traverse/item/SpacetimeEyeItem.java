@@ -2,61 +2,61 @@ package net.kasara.ts_spacetime_traverse.item;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.server.PositionSwapModeManager;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 /**
- * プレイヤーが使用すると特定の進捗を付与し、アイテムを消費するカスタムアイテム。
+ * プレイヤーが使用すると特定の進捗を付与し、アイテムを消費するアイテム
  */
 public class SpacetimeEyeItem extends Item {
-    public SpacetimeEyeItem(Settings settings) {
-        super(settings);
+    public SpacetimeEyeItem(Properties pros) {
+        super(pros);
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         // 使用した手をMinecraftに通知(アニメーションなどで必要)
-        user.setCurrentHand(hand);
+        player.startUsingItem(hand);
 
         // サーバー側かつプレイヤーがサーバープレイヤーエンティティの場合
-        if (world instanceof ServerWorld && user instanceof ServerPlayerEntity serverPlayer) {
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
 
             // 右クリック時に手に持ってるアイテムスタックを取得
-            ItemStack stack = user.getStackInHand(hand);
+            ItemStack stack = serverPlayer.getItemInHand(hand);
 
             // プレイヤーの進捗トラッカー取得
-            PlayerAdvancementTracker tracker = serverPlayer.getAdvancementTracker();
+            PlayerAdvancements tracker = serverPlayer.getAdvancements();
 
             // JSONで作った子進捗を取得
-            AdvancementEntry adv = serverPlayer.getEntityWorld().getServer()
-                    .getAdvancementLoader()
-                    .get(Identifier.of(TokorotenSlimeAPI.getModId(), "use_spacetime_eye"));
+            AdvancementHolder adv = serverPlayer.level().getServer()
+                    .getAdvancements()
+                    .get(Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), "use_spacetime_eye"));
 
             // 進捗が存在し、まだ達成していない場合
-            if (adv != null && !tracker.getProgress(adv).isDone()) {
+            if (adv != null && !tracker.getOrStartProgress(adv).isDone()) {
                 // 進捗を達成させる
-                tracker.grantCriterion(adv, "use_spacetime_eye");
-
+                tracker.award(adv, "use_spacetime_eye");
                 // モード変更
-                PositionSwapModeManager.toggle(user);
+                PositionSwapModeManager.toggle(player);
 
                 // アイテム消費（クリエイティブは減らさない）
-                stack.decrementUnlessCreative(1, user);
+                if (!serverPlayer.getAbilities().instabuild) {
+                    stack.shrink(1);
+                }
 
                 // 使用統計を更新
-                user.incrementStat(Stats.USED.getOrCreateStat(this));
+                player.awardStat(Stats.ITEM_USED.get(this));
             }
         }
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 }

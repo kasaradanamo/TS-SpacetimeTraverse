@@ -2,29 +2,28 @@ package net.kasara.ts_spacetime_traverse.item;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 
 import java.util.function.Function;
 
 public class ModItems {
 
     // 時空の目アイテムの登録
-    public static final Item SPACETIME_EYE = registerAndAddToTab("spacetime_eye", setting -> new SpacetimeEyeItem(
-            setting.fireproof().rarity(Rarity.EPIC)));
+    public static final Item SPACETIME_EYE = registerAndAddToTab("spacetime_eye", pros -> new SpacetimeEyeItem(
+            pros.fireResistant().rarity(Rarity.EPIC)));
 
-    private static Item registerAndAddToTab(String name, Function<Item.Settings, Item> function) {
+    private static Item registerAndAddToTab(String name, Function<Item.Properties, Item> factory) {
+        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name));
         Item item = Registry.register(
-                Registries.ITEM,
-                Identifier.of(TokorotenSlimeAPI.getModId(), name),
-                function.apply(new Item.Settings().registryKey(
-                        RegistryKey.of(RegistryKeys.ITEM, Identifier.of(TokorotenSlimeAPI.getModId(), name)))
-                )
+                BuiltInRegistries.ITEM,
+                key,
+                factory.apply(new Item.Properties().setId(key))
         );
         // API経由でグループに追加
         TokorotenSlimeAPI.addItemToTab(item);
@@ -32,7 +31,7 @@ public class ModItems {
     }
 
     /**
-     * 登録確認用のログを出力する
+     * 登録確認用のログ出力
      */
     public static void registerModItems() {
         TSSpacetimeTraverse.LOGGER.info("Registering addon items for "+ TokorotenSlimeAPI.getModId() +" (from " + TSSpacetimeTraverse.MOD_ID + ")");

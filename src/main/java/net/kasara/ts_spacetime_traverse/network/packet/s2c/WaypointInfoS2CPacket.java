@@ -4,39 +4,39 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 import net.kasara.ts_spacetime_traverse.client.WaypointClientManager;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
 
-public record WaypointInfoS2CPacket(List<WaypointData> waypoints, UUID quick) implements CustomPayload {
+public record WaypointInfoS2CPacket(List<WaypointData> waypoints, UUID quick) implements CustomPacketPayload {
 
-    public static final CustomPayload.Id<WaypointInfoS2CPacket> ID =
-            new CustomPayload.Id<>(Identifier.of(TSSpacetimeTraverse.MOD_ID, "waypoints_info"));
+    public static final CustomPacketPayload.Type<WaypointInfoS2CPacket> ID =
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "waypoints_info"));
 
-    public static final PacketCodec<RegistryByteBuf, WaypointInfoS2CPacket> CODEC =
-            PacketCodec.tuple(
-                    PacketCodecs.collection(ArrayList::new, WaypointData.PACKET_CODEC),
+    public static final StreamCodec<RegistryFriendlyByteBuf, WaypointInfoS2CPacket> CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.collection(ArrayList::new, WaypointData.STREAM_CODEC),
                     WaypointInfoS2CPacket::waypoints,
-                    PacketCodecs.optional(Uuids.PACKET_CODEC),
-                    p -> Optional.ofNullable(p.quick()),
-                    (waypoints, quick) -> new WaypointInfoS2CPacket(
+                    ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC),
+                    packet -> Optional.ofNullable(packet.quick()),
+                    (waypoints, quickOpt) -> new WaypointInfoS2CPacket(
                             waypoints,
-                            quick.orElse(null)
+                            quickOpt.orElse(null)
                     )
             );
 
     @Override
-    public CustomPayload.Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
-    public static void send(ServerPlayerEntity player, Collection<WaypointData> waypoints, UUID quick) {
+    public static void send(ServerPlayer player, Collection<WaypointData> waypoints, UUID quick) {
         ServerPlayNetworking.send(player, new WaypointInfoS2CPacket(new ArrayList<>(waypoints), quick));
     }
 

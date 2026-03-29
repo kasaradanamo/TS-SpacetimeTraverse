@@ -6,10 +6,10 @@ import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.client.gui.screen.PortalActionScreen;
 import net.kasara.ts_spacetime_traverse.client.gui.screen.WaypointFormScreen;
 import net.kasara.ts_spacetime_traverse.client.gui.widget.WaypointListWidget;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -27,15 +27,15 @@ public record PortalActionController(PortalActionScreen screen) {
      */
     public void onPlacePortal(WaypointListWidget.@Nullable Entry selected) {
         if (selected == null) return;
-        screen.close(); // 画面を閉じる
-        PortalActionClientHandler.placePortal(MinecraftClient.getInstance().player, selected.data.uuid());
+        screen.onClose(); // 画面を閉じる
+        PortalActionClientHandler.placePortal(Minecraft.getInstance().player, selected.data.uuid());
     }
 
     /**
      * ウェイポイント登録画面を開く
      */
     public void onOpenWaypointFormRegister() {
-        MinecraftClient.getInstance().setScreen(WaypointFormScreen.register(screen));
+        Minecraft.getInstance().setScreen(WaypointFormScreen.register(screen));
     }
 
     /**
@@ -54,7 +54,7 @@ public record PortalActionController(PortalActionScreen screen) {
      */
     public void onEditWaypoint(WaypointListWidget.@Nullable Entry selected) {
         if (selected == null) return;
-        MinecraftClient.getInstance().setScreen(WaypointFormScreen.edit(screen, selected.data));
+        Minecraft.getInstance().setScreen(WaypointFormScreen.edit(screen, selected.data));
     }
 
     /**
@@ -66,21 +66,21 @@ public record PortalActionController(PortalActionScreen screen) {
         if (selected == null) return;
 
         // 確認画面を表示して、削除を実行
-        MinecraftClient.getInstance().setScreen(new ConfirmScreen(
+        Minecraft.getInstance().setScreen(new ConfirmScreen(
                 confirmed -> {
                     if (confirmed) {
                         WaypointClientManager.applyWaypointChange(selected.data, true);
                         screen.refreshWaypointList();   // リストを更新
                     }
-                    MinecraftClient.getInstance().setScreen(screen);    // 元の画面に戻す
+                    Minecraft.getInstance().setScreen(screen);    // 元の画面に戻す
                 },
-                Text.translatable("screen.tokorotenslime.portal_action.delete.message"),
-                Text.literal("'" + selected.data.name() + "'"),
-                Text.translatable("screen.tokorotenslime.portal_action.delete"),
-                Text.translatable("screen.tokorotenslime.portal_action.delete.cancel")
+                Component.translatable("screen.tokorotenslime.portal_action.delete.message"),
+                Component.literal("'" + selected.data.name() + "'"),
+                Component.translatable("screen.tokorotenslime.portal_action.delete"),
+                Component.translatable("screen.tokorotenslime.portal_action.delete.cancel")
         ) {
             @Override
-            public boolean shouldPause() {
+            public boolean isPauseScreen() {
                 return false;   // ゲームを一時停止させない
             }
         });
@@ -98,11 +98,11 @@ public record PortalActionController(PortalActionScreen screen) {
      */
     public void updateButtons(
             WaypointListWidget.@Nullable Entry selected,
-            ButtonWidget place,
-            ButtonWidget quick,
-            ButtonWidget edit,
-            ButtonWidget delete,
-            ButtonWidget register
+            Button place,
+            Button quick,
+            Button edit,
+            Button delete,
+            Button register
     ) {
         boolean hasSelection = selected != null;
         boolean isQuick = hasSelection && selected.data.uuid().equals(WaypointClientCache.getQuick());

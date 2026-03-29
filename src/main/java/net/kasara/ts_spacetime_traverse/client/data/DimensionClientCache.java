@@ -3,7 +3,7 @@ package net.kasara.ts_spacetime_traverse.client.data;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kasara.ts_spacetime_traverse.util.DimensionBounds;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 

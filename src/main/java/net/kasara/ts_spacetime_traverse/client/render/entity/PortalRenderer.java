@@ -1,19 +1,20 @@
 package net.kasara.ts_spacetime_traverse.client.render.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
-import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
 import net.kasara.ts_spacetime_traverse.client.render.entity.state.PortalRenderState;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -22,16 +23,16 @@ import org.joml.Quaternionf;
  * PortalEntityの描画クラス
  */
 @Environment(EnvType.CLIENT)
-public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderState>{
+public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderState> {
 
-    private static final Identifier TEXTURE = Identifier.of(TokorotenSlimeAPI.getModId(), "textures/entity/portal.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), "textures/entity/portal.png");
 
-    private static final float WIDTH = 3.0f;             // ポータルの幅
-    private static final float HEIGHT = 3.0f;            // ポータルの高さ
-    private static final float SPIN_SPEED = 0.05f;       // 自転速度
+    private static final float WIDTH = 3.0f;              // ポータルの幅
+    private static final float HEIGHT = 3.0f;             // ポータルの高さ
+    private static final float SPIN_SPEED = 0.05f;        // 自転速度
     private static final double NAME_TAG_DISTANCE = 15.0; // ラベル表示距離の最大
 
-    public PortalRenderer(EntityRendererFactory.Context context) {
+    public PortalRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
@@ -41,57 +42,57 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
     }
 
     @Override
-    public void render(PortalRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
-        super.render(renderState, matrices, queue, cameraState);
+    public void submit(PortalRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+        super.submit(state, poseStack, submitNodeCollector, camera);
 
-        matrices.push();
+        poseStack.pushPose();
 
         // 常にカメラ正面を向いて回転
-        Quaternionf rot = new Quaternionf(cameraState.orientation);
+        Quaternionf rot = new Quaternionf(camera.orientation);
         rot.x = 0;
         rot.z = 0;
         rot.normalize();
-        matrices.multiply(rot);
+        poseStack.mulPose(rot);
 
         // スケール適応
-        float scale = renderState.scale;
-        matrices.translate(0, HEIGHT / 2, 0);
-        matrices.scale(scale, scale, scale);
-        matrices.translate(0, -HEIGHT / 2, 0);
+        float scale = state.scale;
+        poseStack.translate(0, HEIGHT / 2, 0);
+        poseStack.scale(scale, scale, scale);
+        poseStack.translate(0, -HEIGHT / 2, 0);
 
         // 中心を軸に自転
-        matrices.translate(0, HEIGHT / 2, 0);
-        matrices.multiply(new Quaternionf().rotateZ(renderState.spin));
-        matrices.translate(0, -HEIGHT / 2, 0);
+        poseStack.translate(0, HEIGHT / 2, 0);
+        poseStack.mulPose(new Quaternionf().rotateZ(state.spin));
+        poseStack.translate(0, -HEIGHT / 2, 0);
 
         // 描画
-        drawPortal(matrices, queue, 1.0f);
+        drawPortal(poseStack, submitNodeCollector, 1.0f);
 
-        matrices.pop();
+        poseStack.popPose();
 
         // ラベル描画(ウェイポイント名、座標、オーナー)
-        drawText(renderState, matrices, queue, cameraState, renderState.waypointName, 0.6f);
-        drawText(renderState, matrices, queue, cameraState, renderState.posText, 0.3f);
-        drawText(renderState, matrices, queue, cameraState, "Owner: " + renderState.ownerName, 0f);
+        drawText(state, poseStack, submitNodeCollector, camera, state.waypointName, 0.6f);
+        drawText(state, poseStack, submitNodeCollector, camera, state.posText, 0.3f);
+        drawText(state, poseStack, submitNodeCollector, camera, "Owner: " + state.ownerName, 0f);
     }
 
     /**
      * ポータル本体の四角形を描画する
      */
-    private void drawPortal(MatrixStack matrices, OrderedRenderCommandQueue queue, float alpha) {
-        queue.submitCustom(
-            matrices,
-            RenderLayers.entityTranslucent(TEXTURE),
-            (entry, vc) -> {
-                Matrix4f mat = entry.getPositionMatrix();
+    private void drawPortal(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, float alpha) {
+        submitNodeCollector.submitCustomGeometry(
+            poseStack,
+            RenderTypes.entityTranslucent(TEXTURE),
+            (pose, vc) -> {
+                Matrix4f mat = pose.pose();
                 int light = 0xF000F0;   // 最大光源
-                int overlay = OverlayTexture.DEFAULT_UV;
+                int overlay = OverlayTexture.NO_OVERLAY;
 
                 // 頂点を指定して四角形を描画
-                vc.vertex(mat, -WIDTH / 2, 0, 0).color(255, 255, 255, (int)(alpha * 255)).texture(0, 1).overlay(overlay).light(light).normal(0, 0, 1);
-                vc.vertex(mat, WIDTH / 2, 0, 0).color(255, 255, 255, (int)(alpha * 255)).texture(1, 1).overlay(overlay).light(light).normal(0, 0, 1);
-                vc.vertex(mat, WIDTH / 2, HEIGHT, 0).color(255, 255, 255, (int)(alpha * 255)).texture(1, 0).overlay(overlay).light(light).normal(0, 0, 1);
-                vc.vertex(mat, -WIDTH / 2, HEIGHT, 0).color(255, 255, 255, (int)(alpha * 255)).texture(0, 0).overlay(overlay).light(light).normal(0, 0, 1);
+                vc.addVertex(mat, -WIDTH / 2, 0, 0).setColor(255, 255, 255, (int)(alpha * 255)).setUv(0, 1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                vc.addVertex(mat, WIDTH / 2, 0, 0).setColor(255, 255, 255, (int)(alpha * 255)).setUv(1, 1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                vc.addVertex(mat, WIDTH / 2, HEIGHT, 0).setColor(255, 255, 255, (int)(alpha * 255)).setUv(1, 0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                vc.addVertex(mat, -WIDTH / 2, HEIGHT, 0).setColor(255, 255, 255, (int)(alpha * 255)).setUv(0, 0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
             }
         );
     }
@@ -99,39 +100,39 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
     /**
      * ポータル上にテキストラベルを描画
      */
-    private void drawText(PortalRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState, String text, float yOffset) {
+    private void drawText(PortalRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraState, String text, float yOffset) {
         if (text == null || text.isEmpty()) return;
 
-        Vec3d labelPos = state.entityPos.add(0, HEIGHT + yOffset - 0.3f, 0);
-        double distSq = cameraState.pos.squaredDistanceTo(labelPos);
+        Vec3 labelPos = state.entityPos.add(0, HEIGHT + yOffset - 0.3f, 0);
+        double distSq = cameraState.pos.distanceToSqr(labelPos);
 
         // 表示距離外なら描画しない
         if (distSq > NAME_TAG_DISTANCE * NAME_TAG_DISTANCE) return;
 
-        queue.submitLabel(
-                matrices,
-                new Vec3d(0, HEIGHT + yOffset - 0.3f, 0),
+        submitNodeCollector.submitNameTag(
+                poseStack,
+                new Vec3(0, HEIGHT + yOffset - 0.3f, 0),
                 0,
-                Text.literal(text),
+                Component.literal(text),
                 true,
-                state.light,
+                state.lightCoords,
                 distSq,
                 cameraState
         );
     }
 
     @Override
-    public void updateRenderState(PortalEntity entity, PortalRenderState state, float tickProgress) {
-        super.updateRenderState(entity, state, tickProgress);
+    public void extractRenderState(PortalEntity entity, PortalRenderState state, float partialTicks) {
+        super.extractRenderState(entity, state, partialTicks);
 
         long spawnTick = entity.getSpawnTick();
-        float now = entity.getEntityWorld().getTime() + tickProgress;
+        float now = entity.level().getGameTime() + partialTicks;
 
         // スポーン前の初期化
         if (spawnTick <= 0) {
             state.scale = 0.0f;
             state.spin = 0.0f;
-            state.entityPos = entity.getLerpedPos(tickProgress);
+            state.entityPos = entity.getPosition(partialTicks);
 
             state.ownerName = entity.getOwnerName();
             state.waypointName = entity.getWaypointName();
@@ -141,7 +142,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
 
         state.scale = getScale(entity, now, spawnTick);
         state.spin = now * SPIN_SPEED;
-        state.entityPos = entity.getLerpedPos(tickProgress);
+        state.entityPos = entity.getPosition(partialTicks);
 
         state.ownerName = entity.getOwnerName();
         state.waypointName = entity.getWaypointName();

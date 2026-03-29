@@ -1,10 +1,11 @@
 package net.kasara.ts_spacetime_traverse.block.entity;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 /**
  * VoidBlockに紐づくBlockEntity
@@ -21,23 +22,23 @@ public class VoidBlockEntity extends BlockEntity {
     /**
      * サーバー側Tick処理
      *
-     * @param world ワールド
+     * @param level レベル
      * @param pos ブロック位置
      * @param state ブロック状態
      * @param be VoidBlockEntity
      */
-    public static void tick(World world, BlockPos pos, BlockState state, VoidBlockEntity be) {
+    public static void tick(Level level, BlockPos pos, BlockState state, VoidBlockEntity be) {
         // クライアント側では処理しない
-        if (world.isClient()) return;
+        if (level.isClientSide()) return;
 
         // ブロック上の1x1x1の領域を監視
-        Box box = new Box(
+        AABB box = new AABB(
                 pos.getX(), pos.getY() + 1, pos.getZ(),
                 pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1
         );
 
         // 領域内にEntityがいるか確認
-        boolean hasEntity = !world.getOtherEntities(null, box).isEmpty();
+        boolean hasEntity = !level.getEntitiesOfClass(Entity.class, box).isEmpty();
 
         if (hasEntity) {
             // Entityがいる場合はカウントリセット
@@ -49,7 +50,7 @@ public class VoidBlockEntity extends BlockEntity {
 
         // 空状態が40tick以上続いたらブロック破壊
         if (be.emptyTicks >= 40) {
-            world.breakBlock(pos, false);
+            level.destroyBlock(pos, false);
         }
     }
 }

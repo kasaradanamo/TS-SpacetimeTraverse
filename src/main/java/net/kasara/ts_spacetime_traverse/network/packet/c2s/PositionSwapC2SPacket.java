@@ -3,42 +3,42 @@ package net.kasara.ts_spacetime_traverse.network.packet.c2s;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 import net.kasara.ts_spacetime_traverse.server.PositionSwapServerHandler;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 
-public record PositionSwapC2SPacket(int targetId, RegistryKey<World> dimension, boolean random) implements CustomPayload {
+public record PositionSwapC2SPacket(int targetId, ResourceKey<Level> dimension, boolean random) implements CustomPacketPayload {
 
-    public static final CustomPayload.Id<PositionSwapC2SPacket> ID =
-            new CustomPayload.Id<>(Identifier.of(TSSpacetimeTraverse.MOD_ID, "position_swap"));
+    public static final CustomPacketPayload.Type<PositionSwapC2SPacket> ID =
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "position_swap"));
 
-    public static final PacketCodec<RegistryByteBuf, PositionSwapC2SPacket> CODEC =
-            PacketCodec.tuple(
-                    PacketCodecs.INTEGER,
+    public static final StreamCodec<RegistryFriendlyByteBuf, PositionSwapC2SPacket> CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.INT,
                     PositionSwapC2SPacket::targetId,
-                    RegistryKey.createPacketCodec(RegistryKeys.WORLD),
+                    ResourceKey.streamCodec(Registries.DIMENSION),
                     PositionSwapC2SPacket::dimension,
-                    PacketCodecs.BOOLEAN,
+                    ByteBufCodecs.BOOL,
                     PositionSwapC2SPacket::random,
                     PositionSwapC2SPacket::new
             );
 
     @Override
-    public CustomPayload.Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
-    public static void send(int targetId, RegistryKey<World> dimension, boolean random) {
+    public static void send(int targetId, ResourceKey<Level> dimension, boolean random) {
         ClientPlayNetworking.send(new PositionSwapC2SPacket(targetId, dimension, random));
     }
 
-    public static void receive(PositionSwapC2SPacket packet, ServerPlayerEntity player) {
+    public static void receive(PositionSwapC2SPacket packet, ServerPlayer player) {
         PositionSwapServerHandler.positionSwap(packet.targetId(), packet.dimension(), player, packet.random());
     }
 }

@@ -2,30 +2,31 @@ package net.kasara.ts_spacetime_traverse.entity;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 
 public class ModEntities {
 
     // ポータルエンティティのEntityType定義
     public static final EntityType<PortalEntity> PORTAL = registerEntity(
             "portal",
-            EntityType.Builder.<PortalEntity>create(PortalEntity::new, SpawnGroup.MISC)
-                    .dropsNothing()                     // 死亡時にドロップなし
-                    .dimensions(1.0F, 2.0F) // ヒットボックスの幅・高さ
-                    .maxTrackingRange(8)                // サーバーとの同期範囲
-                    .trackingTickInterval(20)           // 同期間隔
+            EntityType.Builder.<PortalEntity>of(PortalEntity::new, MobCategory.MISC)
+                    .noLootTable()                          // 死亡時にドロップなし
+                    .sized(1.0F, 2.0F)          // ヒットボックスの幅・高さ
+                    .clientTrackingRange(8)   // サーバーとの同期範囲
+                    .updateInterval(20)                     // 同期間隔
     );
 
     private static <T extends Entity> EntityType<T> registerEntity(String name, EntityType.Builder<T> builder) {
-        RegistryKey<EntityType<?>> key = RegistryKey.of(Registries.ENTITY_TYPE.getKey(), Identifier.of(TokorotenSlimeAPI.getModId(), name));
+        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name));
         return Registry.register(
-                Registries.ENTITY_TYPE,
+                BuiltInRegistries.ENTITY_TYPE,
                 key,
                 builder.build(key)
         );

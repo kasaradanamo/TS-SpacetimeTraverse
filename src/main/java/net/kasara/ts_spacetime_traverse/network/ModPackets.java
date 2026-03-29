@@ -8,10 +8,10 @@ import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.*;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.DimensionListS2CPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.WaypointInfoS2CPacket;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -56,19 +56,19 @@ public class ModPackets {
         TSSpacetimeTraverse.LOGGER.info("Registering addon S2CPackets for "+ TokorotenSlimeAPI.getModId() +" (from " + TSSpacetimeTraverse.MOD_ID + ")");
     }
 
-    private static <T extends CustomPayload> void registerPTC2S(CustomPayload.Id<T> id, PacketCodec<RegistryByteBuf, T> codec) {
-        PayloadTypeRegistry.playC2S().register(id, codec);
+    private static <T extends CustomPacketPayload> void registerPTC2S(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
+        PayloadTypeRegistry.serverboundPlay().register(id, codec);
     }
 
-    private static <T extends CustomPayload> void registerPTS2C(CustomPayload.Id<T> id, PacketCodec<RegistryByteBuf, T> codec) {
-        PayloadTypeRegistry.playS2C().register(id, codec);
+    private static <T extends CustomPacketPayload> void registerPTS2C(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
+        PayloadTypeRegistry.clientboundPlay().register(id, codec);
     }
 
-    private static <T extends CustomPayload> void registerC2S(CustomPayload.Id<T> id, BiConsumer<T, ServerPlayerEntity> handler) {
+    private static <T extends CustomPacketPayload> void registerC2S(CustomPacketPayload.Type<T> id, BiConsumer<T, ServerPlayer> handler) {
         ServerPlayNetworking.registerGlobalReceiver(id, (packet, context) -> handler.accept(packet, context.player()));
     }
 
-    private static <T extends CustomPayload> void registerS2C(CustomPayload.Id<T> id, Consumer<T> handler) {
+    private static <T extends CustomPacketPayload> void registerS2C(CustomPacketPayload.Type<T> id, Consumer<T> handler) {
         ClientPlayNetworking.registerGlobalReceiver(id, (packet, context) -> handler.accept(packet));
     }
 }

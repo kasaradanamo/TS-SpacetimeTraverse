@@ -2,12 +2,12 @@ package net.kasara.ts_spacetime_traverse.server;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * プレイヤーに保存するスワップポジションモードの制御
@@ -24,19 +24,19 @@ public class PositionSwapModeManager {
      * プレイヤーに保存されているスワップモードを取得
      * データが存在しない場合はnormalを返す
      */
-    public static String get(PlayerEntity player) {
-        NbtCompound nbt = TokorotenSlimeAPI.getAddonData(player, TSSpacetimeTraverse.MOD_ID);
+    public static String get(Player player) {
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSSpacetimeTraverse.MOD_ID);
         return nbt.getString(POSITION_SWAP_MODE).orElse(NORMAL);
     }
 
     /**
      * プレイヤーのスワップモードを設定する
      */
-    public static void set(PlayerEntity player, String mode) {
-        NbtCompound nbt = TokorotenSlimeAPI.getAddonData(player, TSSpacetimeTraverse.MOD_ID);
+    public static void set(Player player, String mode) {
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSSpacetimeTraverse.MOD_ID);
         nbt.putString(POSITION_SWAP_MODE, mode);
 
-        if(player instanceof ServerPlayerEntity serverPlayer) {
+        if(player instanceof ServerPlayer serverPlayer) {
             TokorotenSlimeAPI.writeAddonData(serverPlayer, TSSpacetimeTraverse.MOD_ID, nbt);
         }
     }
@@ -44,17 +44,17 @@ public class PositionSwapModeManager {
     /**
      * モード切替
      */
-    public static void toggle(PlayerEntity player) {
-        Text modeText;
+    public static void toggle(Player player) {
+        Component modeText;
 
         if (get(player).equals(ENHANCED)) {
             set(player, NORMAL);
-            modeText = Text.translatable("mode.tokorotenslime.position_swap." + NORMAL).setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE));
+            modeText = Component.translatable("mode.tokorotenslime.position_swap." + NORMAL).setStyle(Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE));
         } else {
             set(player, ENHANCED);
-            modeText = Text.translatable("mode.tokorotenslime.position_swap." + ENHANCED).setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE));
+            modeText = Component.translatable("mode.tokorotenslime.position_swap." + ENHANCED).setStyle(Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE));
         }
 
-        player.sendMessage(Text.translatable("message.tokorotenslime.position_swap_mode", modeText), false);
+        player.sendSystemMessage(Component.translatable("message.tokorotenslime.position_swap_mode", modeText));
     }
 }

@@ -1,10 +1,10 @@
 package net.kasara.ts_spacetime_traverse.util;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
-import net.minecraft.block.Block;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 
 public class ModTags {
 
@@ -14,7 +14,7 @@ public class ModTags {
         public static final TagKey<Block> PASS_THROUGH_BLOCK = createTag("pass_through_block");
 
         private static TagKey<Block> createTag(String name) {
-            return TagKey.of(RegistryKeys.BLOCK, Identifier.of(TokorotenSlimeAPI.getModId(), name));
+            return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name));
         }
     }
 }

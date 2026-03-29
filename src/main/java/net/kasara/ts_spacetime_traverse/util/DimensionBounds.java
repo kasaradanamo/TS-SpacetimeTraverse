@@ -1,24 +1,24 @@
 package net.kasara.ts_spacetime_traverse.util;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record DimensionBounds(int minY, int maxY, double minX, double maxX, double minZ, double maxZ) {
 
-    public static final PacketCodec<RegistryByteBuf, DimensionBounds> PACKET_CODEC =
-            PacketCodec.tuple(
-                    PacketCodecs.INTEGER,
+    public static final StreamCodec<RegistryFriendlyByteBuf, DimensionBounds> STREAM_CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.INT,
                     DimensionBounds::minY,
-                    PacketCodecs.INTEGER,
+                    ByteBufCodecs.INT,
                     DimensionBounds::maxY,
-                    PacketCodecs.DOUBLE,
+                    ByteBufCodecs.DOUBLE,
                     DimensionBounds::minX,
-                    PacketCodecs.DOUBLE,
+                    ByteBufCodecs.DOUBLE,
                     DimensionBounds::maxX,
-                    PacketCodecs.DOUBLE,
+                    ByteBufCodecs.DOUBLE,
                     DimensionBounds::minZ,
-                    PacketCodecs.DOUBLE,
+                    ByteBufCodecs.DOUBLE,
                     DimensionBounds::maxZ,
                     DimensionBounds::new
             );

@@ -13,18 +13,18 @@ import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
 public class ModClientEvents {
 
     /**
-     * ライアントイベントをまとめて登録
+     * イベントをまとめて登録
      */
     public static void registerEvents() {
         // クライアントの毎Tick終了時に呼ばれるイベント
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null) return;
+        ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+            if (minecraft.player == null) return;
 
             // 位置入れ替え系のキー入力・処理
-            PositionSwapClientHandler.handleSwapPositions(client);
+            PositionSwapClientHandler.handleSwapPositions(minecraft);
 
             // ポータル操作系のキー入力・処理
-            PortalActionClientHandler.handlePortalAction(client);
+            PortalActionClientHandler.handlePortalAction(minecraft);
         });
 
         // ログ

@@ -2,47 +2,47 @@ package net.kasara.ts_spacetime_traverse.block;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverse;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import java.util.function.Function;
 
 public class ModBlocks {
 
     // ポータルくぐった際足元何もなかった時に出てくる一時ブロック
-    public static final Block VOID_BLOCK = registerBlock("void_block", properties -> new VoidBlock(properties
+    public static final Block VOID_BLOCK = registerBlock("void_block", pros -> new VoidBlock(pros
             .strength(-1.0F, 3600000.0F)    // 岩盤と同じ
-            .dropsNothing()                 // ドロップなし
-            .nonOpaque()                    // 透過ブロック
-            .allowsSpawning(Blocks::never)  // スポーン不可
-            .solidBlock(Blocks::never)      // 衝突判定なし
-            .suffocates(Blocks::never)      // 窒息判定なし
-            .blockVision(Blocks::never)     // 視界を遮らない
+            .noLootTable()                      // ドロップなし
+            .noOcclusion()                      // 透過ブロック
+            .isValidSpawn(Blocks::never)        // スポーン不可
+            .isRedstoneConductor(Blocks::never) // 衝突判定なし
+            .isSuffocating(Blocks::never)       // 窒息判定なし
+            .isViewBlocking(Blocks::never)      // 視界を遮らない
     ));
 
-    private static Block registerBlock(String name, Function<AbstractBlock.Settings, Block> function) {
-        // ブロックのインスタンス生成
-        Block toRegister = function.apply(AbstractBlock.Settings.create().registryKey(RegistryKey.of(RegistryKeys.BLOCK,
-                Identifier.of(TokorotenSlimeAPI.getModId(), name))));
+    private static Block registerBlock(String name, Function<BlockBehaviour.Properties, Block> factory) {
+        ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name));
+        Block block = factory.apply(BlockBehaviour.Properties.of().setId(key));
         // BlockItem を登録
-        registerBlockItem(name, toRegister);
-        // ブロック本体を登録
-        return Registry.register(Registries.BLOCK, Identifier.of(TokorotenSlimeAPI.getModId(), name), toRegister);
+        registerBlockItem(key, block);
+        // ブロック本体をレジストリに登録
+        return Registry.register(BuiltInRegistries.BLOCK, key, block);
     }
 
-    private static void registerBlockItem(String name, Block block) {
-        Registry.register(Registries.ITEM, Identifier.of(TokorotenSlimeAPI.getModId(), name),
-                new BlockItem(block, new Item.Settings()
-                        .useBlockPrefixedTranslationKey()   // 翻訳キーにブロック名を反映
-                        .registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(TokorotenSlimeAPI.getModId(), name))))
+    private static void registerBlockItem(ResourceKey<Block> blockKey, Block block) {
+        ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, blockKey.identifier());
+        Registry.register(
+                BuiltInRegistries.ITEM,
+                itemKey,
+                new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())
         );
     }
 
