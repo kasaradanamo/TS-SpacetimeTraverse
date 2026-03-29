@@ -1,5 +1,6 @@
 # Spacetime Traverse
-![spacetime_traverse](https://cdn.modrinth.com/data/cached_images/31a55c1d31050eddd575e3ff7725fb69fc5b9854_0.webp)
+![spacetime_traverse](https://cdn.modrinth.com/data/cached_images/31a55c1d31050eddd575e3ff7725fb69fc5b9854_0.webp)<br>
+<br>
 
 - **<a href="https://x.com/kasaradanamo" target="_blank">X(Twitter)</a>**<br>
 - **<a href="https://github.com/kasaradanamo/TS-SpacetimeTraverse" target="_blank">GitHub</a>**<br>
@@ -12,7 +13,7 @@ This Mod adds functionality enabling spacetime travel.<br>
 This Mod is an addon for <a href="https://modrinth.com/project/tokorotenslime" target="_blank">Tokorotenslime</a>, so you'll also need to download that as well.<br>
 
 ## Position Swap
-- You can swap positions and orientations with entities within a 30-block radius that are facing inward.
+- You can swap your position, rotation, and some states with an entity you are looking at within a 30-block radius.
 - If the distance to the entity the player is looking at is within 4 blocks, it will randomly swap with an entity inside a block within 30 blocks (the player is excluded in this case).
 - In this case, it faces the direction of the coordinates before the swap.
 - **The default key is R.**
@@ -30,7 +31,7 @@ This Mod is an addon for <a href="https://modrinth.com/project/tokorotenslime" t
 - You can register up to 10 waypoints.
 - Quick Register allows you to spawn a portal to a registered waypoint without opening the waypoint list screen.
 - Pressing a specific key allows you to spawn or remove a portal.
-- If there is no block beneath the player when warping, a temporary platform block will appear.
+- If there is no block beneath the player when warping, a temporary platform block will appear.(It will not appear if the entity is airborne.)
 - This temporary block only disappears over time, and will vanish if no entity is detected for 2 seconds.
 - The portal will not appear if there is an entity at the intended spawn location.
 - Portals automatically disappear after approximately 1 minute.
@@ -38,6 +39,9 @@ This Mod is an addon for <a href="https://modrinth.com/project/tokorotenslime" t
 <br><br>
 - **C key (default)**: Spawns a portal linked to the quick-registered waypoint. If pressed while looking at your own portal, the portal will be removed.
 - **C key (default) + Ctrl**: Opens the Waypoint List screen.
+<br><br>
+- The swap ability is enhanced, adding velocity during the swap.
+- Press **R (default) + Ctrl** to use the original(non-enhanced) behavior.
 
 ---
 
@@ -49,7 +53,7 @@ The English explanation is above.<br>
 このModは<a href="https://modrinth.com/project/tokorotenslime" target="_blank">Tokorotenslime</a>のアドオンであるため、そちらもダウンロードが必要です。<br>
 
 ## 位置入れ替え
-- 半径30ブロック以内のブロックの内側にある目線を向けているエンティティと位置・向きを入れ替えることができます。
+- 半径30ブロック以内のブロックの内側にある目線を向けているエンティティと位置・向き・一部状態を入れ替えることができます。
 - 目線を向けている先のエンティティとの距離が4ブロック以内であった場合、30ブロック以内のブロックの内側にあるエンティティとランダムで入れ替わります(この場合プレイヤーは対象外です)。
 - この場合は、入れ替わる前の座標の方向を向きます。
 - **デフォルトキーはRです。**
@@ -57,7 +61,7 @@ The English explanation is above.<br>
 ## 空間移動
 ### クラフト
 - エンダーアイ、ネザライトインゴットx4、ネザースターx4をクラフトに使用します。<br>
-![spacetime_eye_recipe](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
+![current_features](https://cdn.modrinth.com/data/cached_images/15b4c20ce02adfa4f05fd939bda84a4f94f22b5c.png)
 
 ### 仕様
 - アイテムを使用することで実績を解除し、ポータルアクションボタンを使用することができるようになります。
@@ -67,7 +71,7 @@ The English explanation is above.<br>
 - ウェイポイントの登録は最大10個まで可能です。
 - クイック登録では、登録したウェイポイント先へ行くポータルをリスト画面を表示せず出現させることができます。
 - 特定のキーを押すことで、ポータル出現、消滅させることができます。
-- ワープ時、足場がなかった場合一時的な足場ブロックが出現します。
+- ワープ時、足場がなかった場合一時的な足場ブロックが出現します。(エンティティが空中状態だった場合出現しません)
 - このブロックは時間でのみ消滅し、2秒間エンティティを検知できなかったら消滅します。
 - ポータルは、出現予定場所にエンティティがある場合出現しません。
 - ポータルは約1分で自動消滅します。
@@ -75,7 +79,6 @@ The English explanation is above.<br>
 <br><br>
 - **Cキー(デフォルト)**: クイック登録されたウェイポイント情報を持つポータルを出現させる(自分のポータルに目線を向けたまま押した場合、ポータルが消滅します)
 - **Cキー(デフォルト) + Ctrlキー**: ウェイポイントリスト画面を表示
-
-
-
-
+<br><br>
+- また、位置入れ替えが強化され、入れ替えに速度が追加されます。
+- **Rキー(デフォルト)+Ctrlキー**で強化前の仕様と使い分けることが可能です。
