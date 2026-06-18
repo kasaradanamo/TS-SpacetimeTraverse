@@ -16,7 +16,7 @@ public record ApplyWaypointChangeC2SPacket(WaypointData waypointData, boolean de
     public static final CustomPacketPayload.Type<ApplyWaypointChangeC2SPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "register_waypoint"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ApplyWaypointChangeC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, ApplyWaypointChangeC2SPacket> STREAM_CODEC =
             StreamCodec.composite(
                     WaypointData.STREAM_CODEC,
                     ApplyWaypointChangeC2SPacket::waypointData,

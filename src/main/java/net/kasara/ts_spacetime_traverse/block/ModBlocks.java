@@ -49,7 +49,7 @@ public class ModBlocks {
     /**
      * 登録確認ログ出力
      */
-    public static void registerBlocks() {
+    public static void register() {
         TSSpacetimeTraverse.LOGGER.info("Registering addon blocks for "+ TokorotenSlimeAPI.getModId() +" (from " + TSSpacetimeTraverse.MOD_ID + ")");
     }
 }

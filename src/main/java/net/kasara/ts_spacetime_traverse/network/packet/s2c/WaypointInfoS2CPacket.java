@@ -19,7 +19,7 @@ public record WaypointInfoS2CPacket(List<WaypointData> waypoints, UUID quick) im
     public static final CustomPacketPayload.Type<WaypointInfoS2CPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "waypoints_info"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, WaypointInfoS2CPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, WaypointInfoS2CPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.collection(ArrayList::new, WaypointData.STREAM_CODEC),
                     WaypointInfoS2CPacket::waypoints,

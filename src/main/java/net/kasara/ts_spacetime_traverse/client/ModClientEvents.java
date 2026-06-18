@@ -15,7 +15,7 @@ public class ModClientEvents {
     /**
      * イベントをまとめて登録
      */
-    public static void registerEvents() {
+    public static void register() {
         // クライアントの毎Tick終了時に呼ばれるイベント
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
             if (minecraft.player == null) return;

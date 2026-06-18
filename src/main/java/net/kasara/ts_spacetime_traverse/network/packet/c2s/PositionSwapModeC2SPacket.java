@@ -14,7 +14,7 @@ public record PositionSwapModeC2SPacket() implements CustomPacketPayload{
     public static final CustomPacketPayload.Type<PositionSwapModeC2SPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "position_swap_mode"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PositionSwapModeC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, PositionSwapModeC2SPacket> STREAM_CODEC =
             StreamCodec.unit(new PositionSwapModeC2SPacket());
 
     @Override

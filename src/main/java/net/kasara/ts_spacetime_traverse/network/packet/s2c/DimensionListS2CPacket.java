@@ -18,7 +18,7 @@ public record DimensionListS2CPacket(Map<Identifier, DimensionBounds> dimensions
     public static final CustomPacketPayload.Type<DimensionListS2CPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "dimension_list"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, DimensionListS2CPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, DimensionListS2CPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, DimensionBounds.STREAM_CODEC),
                     DimensionListS2CPacket::dimensions,

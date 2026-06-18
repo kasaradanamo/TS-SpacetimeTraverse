@@ -17,23 +17,23 @@ public class TSSpacetimeTraverse implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // ネットワークパケットタイプとクライアント→サーバーパケットの登録
+        // C2Sパケット登録
         ModPackets.registerPayloadTypes();
         ModPackets.registerC2SPackets();
 
         // アイテム登録
-        ModItems.registerModItems();
+        ModItems.register();
 
         // ブロック登録
-        ModBlocks.registerBlocks();
+        ModBlocks.register();
 
         // ブロックエンティティ登録
-        ModBlockEntities.registerBlockEntities();
+        ModBlockEntities.register();
 
         // エンティティ登録
-        ModEntities.registerModEntities();
+        ModEntities.register();
 
         // サーバーイベント登録
-        ModServerEvents.registerEvents();
+        ModServerEvents.register();
     }
 }

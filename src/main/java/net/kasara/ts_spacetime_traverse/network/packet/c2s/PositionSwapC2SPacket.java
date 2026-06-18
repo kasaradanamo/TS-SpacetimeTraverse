@@ -18,7 +18,7 @@ public record PositionSwapC2SPacket(int targetId, ResourceKey<Level> dimension, 
     public static final CustomPacketPayload.Type<PositionSwapC2SPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "position_swap"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PositionSwapC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, PositionSwapC2SPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.INT,
                     PositionSwapC2SPacket::targetId,

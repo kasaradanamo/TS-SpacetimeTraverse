@@ -17,7 +17,7 @@ public record PlacePortalC2SPacket(UUID waypointDataUuid) implements CustomPacke
     public static final CustomPacketPayload.Type<PlacePortalC2SPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "place_portal"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PlacePortalC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, PlacePortalC2SPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUIDUtil.STREAM_CODEC,
                     PlacePortalC2SPacket::waypointDataUuid,

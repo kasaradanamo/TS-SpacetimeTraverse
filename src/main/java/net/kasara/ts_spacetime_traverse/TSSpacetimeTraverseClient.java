@@ -11,16 +11,16 @@ import net.minecraft.client.renderer.entity.EntityRenderers;
 public class TSSpacetimeTraverseClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        // カスタムキー入力イベントの登録
+        // カスタムキー入力イベント登録
         ModKeyMappings.register();
 
-        // クライアントイベントの登録
-        ModClientEvents.registerEvents();
+        // クライアントイベント登録
+        ModClientEvents.register();
 
-        // ポータルエンティティのレンダラー登録
+        // ポータルエンティティ描画登録
         EntityRenderers.register(ModEntities.PORTAL, PortalRenderer::new);
 
-        // サーバー→クライアントパケットの登録
+        // S2Cパケット登録
         ModPackets.registerS2CPackets();
     }
 }

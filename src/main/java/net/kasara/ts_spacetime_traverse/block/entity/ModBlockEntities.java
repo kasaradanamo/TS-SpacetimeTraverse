@@ -17,7 +17,7 @@ public class ModBlockEntities {
     /**
      * BlockEntityの登録
      */
-    public static void registerBlockEntities() {
+    public static void register() {
 
         // VoidBlockに対応するBlockEntityタイプを生成
         VOID_BE = FabricBlockEntityTypeBuilder.create(VoidBlockEntity::new, ModBlocks.VOID_BLOCK).build();

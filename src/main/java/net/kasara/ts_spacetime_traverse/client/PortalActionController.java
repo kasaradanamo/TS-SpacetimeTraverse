@@ -35,7 +35,7 @@ public record PortalActionController(PortalActionScreen screen) {
      * ウェイポイント登録画面を開く
      */
     public void onOpenWaypointFormRegister() {
-        Minecraft.getInstance().setScreen(WaypointFormScreen.register(screen));
+        Minecraft.getInstance().setScreenAndShow(WaypointFormScreen.register(screen));
     }
 
     /**
@@ -54,7 +54,7 @@ public record PortalActionController(PortalActionScreen screen) {
      */
     public void onEditWaypoint(WaypointListWidget.@Nullable Entry selected) {
         if (selected == null) return;
-        Minecraft.getInstance().setScreen(WaypointFormScreen.edit(screen, selected.data));
+        Minecraft.getInstance().setScreenAndShow(WaypointFormScreen.edit(screen, selected.data));
     }
 
     /**
@@ -66,13 +66,13 @@ public record PortalActionController(PortalActionScreen screen) {
         if (selected == null) return;
 
         // 確認画面を表示して、削除を実行
-        Minecraft.getInstance().setScreen(new ConfirmScreen(
+        Minecraft.getInstance().setScreenAndShow(new ConfirmScreen(
                 confirmed -> {
                     if (confirmed) {
                         WaypointClientManager.applyWaypointChange(selected.data, true);
                         screen.refreshWaypointList();   // リストを更新
                     }
-                    Minecraft.getInstance().setScreen(screen);    // 元の画面に戻す
+                    Minecraft.getInstance().setScreenAndShow(screen);    // 元の画面に戻す
                 },
                 Component.translatable("screen.tokorotenslime.portal_action.delete.message"),
                 Component.literal("'" + selected.data.name() + "'"),

@@ -15,10 +15,10 @@ import java.util.function.Function;
 public class ModItems {
 
     // 時空の目アイテムの登録
-    public static final Item SPACETIME_EYE = registerAndAddToTab("spacetime_eye", pros -> new SpacetimeEyeItem(
+    public static final Item SPACETIME_EYE = registerItemAndAddToTab("spacetime_eye", pros -> new SpacetimeEyeItem(
             pros.fireResistant().rarity(Rarity.EPIC)));
 
-    private static Item registerAndAddToTab(String name, Function<Item.Properties, Item> factory) {
+    private static Item registerItemAndAddToTab(String name, Function<Item.Properties, Item> factory) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name));
         Item item = Registry.register(
                 BuiltInRegistries.ITEM,
@@ -33,7 +33,7 @@ public class ModItems {
     /**
      * 登録確認用のログ出力
      */
-    public static void registerModItems() {
+    public static void register() {
         TSSpacetimeTraverse.LOGGER.info("Registering addon items for "+ TokorotenSlimeAPI.getModId() +" (from " + TSSpacetimeTraverse.MOD_ID + ")");
     }
 }

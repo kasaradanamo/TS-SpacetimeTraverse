@@ -17,7 +17,7 @@ public record RegisterQuickC2SPacket(UUID dataUuid) implements CustomPacketPaylo
     public static final CustomPacketPayload.Type<RegisterQuickC2SPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "register_quick"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, RegisterQuickC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, RegisterQuickC2SPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUIDUtil.STREAM_CODEC,
                     RegisterQuickC2SPacket::dataUuid,

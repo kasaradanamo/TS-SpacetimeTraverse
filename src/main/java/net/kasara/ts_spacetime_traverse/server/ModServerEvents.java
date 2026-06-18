@@ -26,7 +26,7 @@ public class ModServerEvents {
     /**
      * サーバー関連イベントの登録処理
      */
-    public static void registerEvents() {
+    public static void register() {
 
         // プレイヤーがサーバーに参加したときの処理
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {

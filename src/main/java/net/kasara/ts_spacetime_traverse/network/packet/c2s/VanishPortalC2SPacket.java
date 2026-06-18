@@ -14,7 +14,7 @@ public record VanishPortalC2SPacket() implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<VanishPortalC2SPacket> ID =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSSpacetimeTraverse.MOD_ID, "vanish_portal"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, VanishPortalC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, VanishPortalC2SPacket> STREAM_CODEC =
             StreamCodec.unit(new VanishPortalC2SPacket());
 
     @Override

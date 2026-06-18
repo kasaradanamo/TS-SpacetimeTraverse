@@ -20,15 +20,15 @@ public class ModPackets {
 
     // PayloadTypesの登録
     public static void registerPayloadTypes() {
-        registerPTC2S(PositionSwapC2SPacket.ID, PositionSwapC2SPacket.CODEC);
-        registerPTC2S(PositionSwapModeC2SPacket.ID, PositionSwapModeC2SPacket.CODEC);
-        registerPTC2S(ApplyWaypointChangeC2SPacket.ID, ApplyWaypointChangeC2SPacket.CODEC);
-        registerPTC2S(RegisterQuickC2SPacket.ID, RegisterQuickC2SPacket.CODEC);
-        registerPTC2S(PlacePortalC2SPacket.ID, PlacePortalC2SPacket.CODEC);
-        registerPTC2S(VanishPortalC2SPacket.ID, VanishPortalC2SPacket.CODEC);
+        registerPTC2S(PositionSwapC2SPacket.ID, PositionSwapC2SPacket.STREAM_CODEC);
+        registerPTC2S(PositionSwapModeC2SPacket.ID, PositionSwapModeC2SPacket.STREAM_CODEC);
+        registerPTC2S(ApplyWaypointChangeC2SPacket.ID, ApplyWaypointChangeC2SPacket.STREAM_CODEC);
+        registerPTC2S(RegisterQuickC2SPacket.ID, RegisterQuickC2SPacket.STREAM_CODEC);
+        registerPTC2S(PlacePortalC2SPacket.ID, PlacePortalC2SPacket.STREAM_CODEC);
+        registerPTC2S(VanishPortalC2SPacket.ID, VanishPortalC2SPacket.STREAM_CODEC);
 
-        registerPTS2C(WaypointInfoS2CPacket.ID, WaypointInfoS2CPacket.CODEC);
-        registerPTS2C(DimensionListS2CPacket.ID, DimensionListS2CPacket.CODEC);
+        registerPTS2C(WaypointInfoS2CPacket.ID, WaypointInfoS2CPacket.STREAM_CODEC);
+        registerPTS2C(DimensionListS2CPacket.ID, DimensionListS2CPacket.STREAM_CODEC);
 
         // ログ
         TSSpacetimeTraverse.LOGGER.info("Registering addon PayloadTypes for "+ TokorotenSlimeAPI.getModId() +" (from " + TSSpacetimeTraverse.MOD_ID + ")");

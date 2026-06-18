@@ -35,7 +35,7 @@ public class ModEntities {
     /**
      * エンティティ登録処理を初期化時に呼び出す
      */
-    public static void registerModEntities() {
+    public static void register() {
         TSSpacetimeTraverse.LOGGER.info("Registering addon Entities for "+ TokorotenSlimeAPI.getModId() +" (from " + TSSpacetimeTraverse.MOD_ID + ")");
     }
 }

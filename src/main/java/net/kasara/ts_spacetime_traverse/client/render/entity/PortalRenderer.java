@@ -116,7 +116,6 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
                 Component.literal(text),
                 true,
                 state.lightCoords,
-                distSq,
                 cameraState
         );
     }
