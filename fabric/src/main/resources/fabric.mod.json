@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}",
+	"version": "${mod_version}",
+	"name": "${mod_name}",
+	"description": "${mod_description}",
+	"authors": [
+		"${mod_authors}"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/ts-spacetime-traverse",
+		"issues": "https://github.com/kasaradanamo/TS-SpacetimeTraverse/issues"
+	},
+	"license": [
+		"Source code: MIT",
+		"Assets: All rights reserved"
+	],
+	"icon": "icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.kasara.ts_spacetime_traverse.fabric.TSSpacetimeTraverse"
+		],
+		"client": [
+			"net.kasara.ts_spacetime_traverse.fabric.TSSpacetimeTraverseClient"
+		]
+	},
+	"mixins": [
+		"ts_spacetime_traverse.fabric.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.17.2",
+		"minecraft": "~1.20.1",
+		"fabric-api": "*",
+		"tokorotenslime": ">=1.4.0"
+	}
+}

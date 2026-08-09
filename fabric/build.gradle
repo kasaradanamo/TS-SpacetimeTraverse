@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:${loom_version}"
+    }
+}
+
+apply plugin: 'fabric-loom'
+
+// このmod(TS_SpacetimeTraverse)配下のcommon/forge/fabricで共有するプロパティ(mod_id等)を読み込む。
+rootProject.ext.loadModProperties(project, 'TS_SpacetimeTraverse')
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    compileOnly "net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5"
+
+   implementation project(path: ':TS_SpacetimeTraverse:common', configuration: 'namedElements')
+
+   modImplementation project(path: ':TokorotenSlime:fabric', configuration: 'namedElements')
+    compileOnly project(path: ':TokorotenSlime:common', configuration: 'namedElements')
+}
+
+rootProject.ext.configureFabricModule(project, ':TS_SpacetimeTraverse:common')

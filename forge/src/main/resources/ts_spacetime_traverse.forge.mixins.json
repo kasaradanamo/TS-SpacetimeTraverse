@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "net.kasara.ts_spacetime_traverse.forge.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "ts_spacetime_traverse.forge.refmap.json",
+	"mixins": [
+	],
+	"client": [
+		"client.ClientAdvancementManagerAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

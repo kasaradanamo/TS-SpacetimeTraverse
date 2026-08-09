@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:saplings",
+    "#minecraft:crops",
+    "minecraft:grass",
+    "minecraft:seagrass",
+    "minecraft:tall_seagrass",
+    "minecraft:fern",
+    "minecraft:tall_grass",
+    "minecraft:large_fern",
+    "minecraft:crimson_roots",
+    "minecraft:warped_roots",
+    "minecraft:hanging_roots",
+    "minecraft:sunflower",
+    "minecraft:lilac",
+    "minecraft:peony",
+    "minecraft:pitcher_plant",
+    "minecraft:sugar_cane",
+    "minecraft:kelp",
+    "minecraft:cobweb"
+  ]
+}
