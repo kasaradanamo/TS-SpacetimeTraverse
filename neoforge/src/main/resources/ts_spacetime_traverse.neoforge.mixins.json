@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "net.kasara.ts_spacetime_traverse.neoforge.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"client.ClientAdvancementManagerAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
