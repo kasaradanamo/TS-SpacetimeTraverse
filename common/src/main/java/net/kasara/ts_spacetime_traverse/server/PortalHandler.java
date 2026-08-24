@@ -24,6 +24,9 @@ import java.util.UUID;
  */
 public class PortalHandler {
 
+    // プレイヤーが設置する場合、探索で得た位置からこの分だけ下げた所がエンティティ座標になる
+    private static final double PLAYER_PLACE_Y_OFFSET = 1.5;
+
     /**
      * 指定されたWaypointに向かうポータルを設置
      * 既に設置済みのポータルがあれば、先に消滅させる
@@ -159,7 +162,7 @@ public class PortalHandler {
         // プレイヤーが新しく設置するポータル
         // (26.2のmoveOrInterpolateToは1.20.1のmoveToに相当)
         if (entity instanceof ServerPlayer player && enteredPortal == null) {
-            portal.moveTo(pos.x, pos.y - 1.5, pos.z, player.getYRot(), 0);
+            portal.moveTo(pos.x, pos.y - PLAYER_PLACE_Y_OFFSET, pos.z, player.getYRot(), 0);
             portal.setOwner(player);
             portal.setWaypoint(waypoint);
         }
@@ -202,12 +205,16 @@ public class PortalHandler {
                 if (forbiddenBox.contains(pos)) continue;
 
                 AABB box = new AABB(
-                        pos.x - 0.2, pos.y - 1.5, pos.z - 0.2,
+                        pos.x - 0.2, pos.y - PLAYER_PLACE_Y_OFFSET, pos.z - 0.2,
                         pos.x + 0.2, pos.y + 0.2, pos.z + 0.2
                 );
 
                 if (!level.noCollision(box)) continue;
-                if (!level.getEntities(null, box).isEmpty()) return null;
+
+                // エンティティとの重なりは、実際に設置されるポータルの当たり判定で見る
+                AABB portalBox = PortalEntity.createHitbox(
+                        new Vec3(pos.x, pos.y - PLAYER_PLACE_Y_OFFSET, pos.z));
+                if (!level.getEntities(null, portalBox).isEmpty()) return null;
 
                 return pos;
             }
@@ -244,10 +251,8 @@ public class PortalHandler {
      * 指定位置にポータルをスポーン可能か判定
      */
     private static boolean canSpawnPortalAt(ServerLevel level, Vec3 center) {
-        AABB portalBox = new AABB(
-                center.x - 0.2, center.y + 1.0, center.z - 0.2,
-                center.x + 0.2, center.y + 1.7, center.z + 0.2
-        );
+        // 実際に設置されるポータルの当たり判定で見る
+        AABB portalBox = PortalEntity.createHitbox(center);
         return level.getEntities((Entity) null, portalBox, entity -> !(entity instanceof PortalEntity)).isEmpty();
     }
 

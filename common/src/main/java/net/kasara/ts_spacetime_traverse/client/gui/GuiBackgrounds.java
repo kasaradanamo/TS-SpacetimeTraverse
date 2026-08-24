@@ -2,16 +2,10 @@ package net.kasara.ts_spacetime_traverse.client.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
 
-/**
- * 26.2のinworld_menu_list_background・inworld_header/footer_separator相当。
- * 1.20.1のバニラには該当テクスチャが無いため単色塗りで再現する。
- */
 public final class GuiBackgrounds {
 
-    // 画面全体。26.2は0x40000000だが、1.20.1にはメニュー背景のぼかしが無いため濃いめにしている
     private static final int MENU_BACKGROUND = 0x90000000;
 
-    // inworld_menu_list_background.png の色
     private static final int LIST_BACKGROUND = 0x70000000;
 
     /**

@@ -417,11 +417,10 @@ public class PortalEntity extends Entity {
     }
 
     /**
-     * 当たり判定
+     * 指定したエンティティ座標におけるポータルの当たり判定
+     * 設置可否の判定でも同じ形を使うため、ここに集約する
      */
-    @Override
-    protected AABB makeBoundingBox() {
-        Vec3 pos = position();
+    public static AABB createHitbox(Vec3 pos) {
         double width = 0.5;
         double height = 0.5;
 
@@ -429,5 +428,13 @@ public class PortalEntity extends Entity {
                 pos.x - width / 2, pos.y + 1 + height / 2, pos.z - width / 2,
                 pos.x + width / 2, pos.y + 1.5 + height / 2, pos.z + width / 2
         );
+    }
+
+    /**
+     * 当たり判定
+     */
+    @Override
+    protected AABB makeBoundingBox() {
+        return createHitbox(position());
     }
 }

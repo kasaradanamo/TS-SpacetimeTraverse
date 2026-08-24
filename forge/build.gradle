@@ -6,7 +6,6 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-// このmod(TS_SpacetimeTraverse)配下のcommon/forge/fabricで共有するプロパティ(mod_id等)を読み込む。
 rootProject.ext.loadModProperties(project, 'TS_SpacetimeTraverse')
 
 mixin {
@@ -18,23 +17,18 @@ mixin {
 rootProject.ext.configureForgeMinecraft(project) {
     "${mod_id}" {
         source sourceSets.main
-        // commonモジュールのソースも開発実行環境(runClient等)で読み込む
         source project(':TS_SpacetimeTraverse:common').sourceSets.main
     }
-    // TS_SpacetimeTraverseはTokorotenSlime(コアMod)に依存するため、実行環境にも読み込む
     "tokorotenslime" {
         source project(':TokorotenSlime:forge').sourceSets.main
         source project(':TokorotenSlime:common').sourceSets.main
     }
-    // 依存関係は無いが、mod同士を組み合わせた動作確認をするため実行環境にのみ読み込む
     "ts_multitools" {
         source project(':TS_MultiTools:forge').sourceSets.main
         source project(':TS_MultiTools:common').sourceSets.main
     }
 }
 
-// TS_MultiToolsのMixin設定は向こうのbuild.gradleのmixin{}が生成するもので、
-// こちらのjarマニフェストに含めるわけにはいかないため、開発実行時の引数としてのみ追加する
 minecraft.runs.configureEach {
     args '--mixin.config', 'ts_multitools.forge.mixins.json'
 }
@@ -42,11 +36,9 @@ minecraft.runs.configureEach {
 dependencies {
     implementation project(':TS_SpacetimeTraverse:common')
 
-    // TokorotenSlime(コアMod)への依存。
     implementation project(':TokorotenSlime:forge')
     implementation project(':TokorotenSlime:common')
 
-    // TS_MultiToolsはコンパイルには不要で、開発実行環境に読み込むためだけの依存。
     runtimeOnly project(':TS_MultiTools:forge')
     runtimeOnly project(':TS_MultiTools:common')
 }

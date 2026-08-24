@@ -10,7 +10,6 @@ buildscript {
 
 apply plugin: 'fabric-loom'
 
-// このmod(TS_SpacetimeTraverse)配下のcommon/forge/fabricで共有するプロパティ(mod_id等)を読み込む。
 rootProject.ext.loadModProperties(project, 'TS_SpacetimeTraverse')
 
 dependencies {
