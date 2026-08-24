@@ -42,7 +42,7 @@ public class PortalActionClientHandler {
                 GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
 
         if (ctrlPressed) {
-            minecraft.setScreen(new PortalActionScreen()); // GUIを開く
+            minecraft.setScreenAndShow(new PortalActionScreen()); // GUIを開く
         } else {
             // 通常押下:視線上にポータルがあれば消去、なければ設置
             PortalEntity lookedPortal = getLookedPortal(minecraft, player);
