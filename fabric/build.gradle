@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:${loom_version}"
+    }
+}
+
+apply plugin: 'fabric-loom'
+
+rootProject.ext.loadModProperties(project, 'TS_SpacetimeTraverse')
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    implementation project(path: ':TS_SpacetimeTraverse:ts_spacetime_traverse-common', configuration: 'namedElements')
+
+    modImplementation project(path: ':TokorotenSlime:tokorotenslime-fabric', configuration: 'namedElements')
+    compileOnly project(path: ':TokorotenSlime:tokorotenslime-common', configuration: 'namedElements')
+
+    // 動作確認用にマルチツールも同居させる
+    modRuntimeOnly project(path: ':TS_MultiTools:ts_multitools-fabric', configuration: 'namedElements')
+}
+
+rootProject.ext.configureFabricModule(project, ':TS_SpacetimeTraverse:ts_spacetime_traverse-common')

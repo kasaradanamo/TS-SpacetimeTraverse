@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev'
+}
+
+rootProject.ext.loadModProperties(project, 'TS_SpacetimeTraverse')
+
+rootProject.ext.configureNeoForgeRuns(project, [
+        (mod_id)         : [project(':TS_SpacetimeTraverse:ts_spacetime_traverse-common').sourceSets.main],
+        'tokorotenslime' : [project(':TokorotenSlime:tokorotenslime-neoforge').sourceSets.main,
+                            project(':TokorotenSlime:tokorotenslime-common').sourceSets.main],
+        'ts_multitools'  : [project(':TS_MultiTools:ts_multitools-neoforge').sourceSets.main,
+                            project(':TS_MultiTools:ts_multitools-common').sourceSets.main]
+])
+
+dependencies {
+    implementation(project(':TS_SpacetimeTraverse:ts_spacetime_traverse-common')) { transitive = false }
+
+    compileOnly(project(':TokorotenSlime:tokorotenslime-neoforge')) { transitive = false }
+    compileOnly(project(':TokorotenSlime:tokorotenslime-common')) { transitive = false }
+}
+
+rootProject.ext.configureNeoForgeModule(project, ':TS_SpacetimeTraverse:ts_spacetime_traverse-common')
