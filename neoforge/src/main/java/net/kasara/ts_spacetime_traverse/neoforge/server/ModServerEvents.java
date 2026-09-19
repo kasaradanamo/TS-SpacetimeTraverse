@@ -2,25 +2,16 @@ package net.kasara.ts_spacetime_traverse.neoforge.server;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.neoforge.TSSpacetimeTraverse;
-import net.kasara.ts_spacetime_traverse.network.packet.s2c.DimensionListS2CPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.WaypointInfoS2CPacket;
+import net.kasara.ts_spacetime_traverse.server.DimensionListSender;
 import net.kasara.ts_spacetime_traverse.server.PortalHandler;
 import net.kasara.ts_spacetime_traverse.server.WaypointServerManager;
-import net.kasara.ts_spacetime_traverse.util.DimensionBounds;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.border.WorldBorder;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -47,7 +38,7 @@ public class ModServerEvents {
         WaypointInfoS2CPacket.send(player, WaypointServerManager.getAll(player), WaypointServerManager.getQuick(player));
 
         // クライアントにディメンションリストを送る
-        sendDimensionList(player.level().getServer(), player);
+        DimensionListSender.send(player.level().getServer(), player);
     }
 
     // プレイヤーがサーバーから切断したときの処理
@@ -75,32 +66,5 @@ public class ModServerEvents {
 
         // Waypointデータを新しいプレイヤーに引き継ぐ
         WaypointServerManager.copyFrom(oldPlayer, newPlayer);
-    }
-
-    /**
-     * ディメンション名リストを作成してパケット送信
-     */
-    private static void sendDimensionList(MinecraftServer server, ServerPlayer player) {
-        Map<Identifier, DimensionBounds> map = new HashMap<>();
-
-        for (ResourceKey<Level> key : server.levelKeys()) {
-            ServerLevel level = server.getLevel(key);
-            if (level == null) continue;
-
-            WorldBorder border = level.getWorldBorder();
-
-            DimensionBounds info = new DimensionBounds(
-                    level.getMinY() + 1,
-                    level.getMaxY(),
-                    border.getMinX(),
-                    border.getMaxX(),
-                    border.getMinZ(),
-                    border.getMaxZ()
-            );
-
-            map.put(key.identifier(), info);
-        }
-
-        DimensionListS2CPacket.send(player, map);
     }
 }

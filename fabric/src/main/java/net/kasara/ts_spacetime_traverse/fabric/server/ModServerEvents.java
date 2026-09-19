@@ -5,20 +5,13 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.fabric.TSSpacetimeTraverse;
-import net.kasara.ts_spacetime_traverse.network.packet.s2c.DimensionListS2CPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.WaypointInfoS2CPacket;
+import net.kasara.ts_spacetime_traverse.server.DimensionListSender;
 import net.kasara.ts_spacetime_traverse.server.PortalHandler;
 import net.kasara.ts_spacetime_traverse.server.WaypointServerManager;
-import net.kasara.ts_spacetime_traverse.util.DimensionBounds;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.border.WorldBorder;
 
-import java.util.*;
+import java.util.UUID;
 
 /**
  * サーバー側の各種イベントを登録するクラス
@@ -37,7 +30,7 @@ public class ModServerEvents {
             WaypointInfoS2CPacket.send(player, WaypointServerManager.getAll(player), WaypointServerManager.getQuick(player));
 
             // クライアントにディメンションリストを送る
-            sendDimensionList(server, player);
+            DimensionListSender.send(server, player);
         });
 
         // プレイヤーがサーバーから切断したときの処理
@@ -61,32 +54,5 @@ public class ModServerEvents {
 
         // ログ
         TSSpacetimeTraverse.LOGGER.info("Registering addon Server Events for "+ TokorotenSlimeAPI.getModId() +" (from " + TSSpacetimeTraverse.MOD_ID + ")");
-    }
-
-    /**
-     * ディメンション名リストを作成してパケット送信
-     */
-    private static void sendDimensionList(MinecraftServer server, ServerPlayer player) {
-        Map<Identifier, DimensionBounds> map = new HashMap<>();
-
-        for (ResourceKey<Level> key : server.levelKeys()) {
-            ServerLevel level = server.getLevel(key);
-            if (level == null) continue;
-
-            WorldBorder border = level.getWorldBorder();
-
-            DimensionBounds info = new DimensionBounds(
-                    level.getMinY() + 1,
-                    level.getMaxY(),
-                    border.getMinX(),
-                    border.getMaxX(),
-                    border.getMinZ(),
-                    border.getMaxZ()
-            );
-
-            map.put(key.identifier(), info);
-        }
-
-        DimensionListS2CPacket.send(player, map);
     }
 }

@@ -10,12 +10,11 @@ import net.kasara.ts_spacetime_traverse.network.packet.c2s.RegisterQuickC2SPacke
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.VanishPortalC2SPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.DimensionListS2CPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.WaypointInfoS2CPacket;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -53,12 +52,10 @@ public class ModPackets {
     }
 
     public static void sendToPlayer(ServerPlayer player, CustomPacketPayload payload) {
-        player.connection.send(new ClientboundCustomPayloadPacket(payload));
+        PacketDistributor.sendToPlayer(player, payload);
     }
 
     public static void sendToServer(CustomPacketPayload payload) {
-        if (Minecraft.getInstance().getConnection() != null) {
-            Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(payload));
-        }
+        ClientPacketDistributor.sendToServer(payload);
     }
 }

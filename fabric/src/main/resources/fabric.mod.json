@@ -25,9 +25,6 @@
 			"net.kasara.ts_spacetime_traverse.fabric.TSSpacetimeTraverseClient"
 		]
 	},
-	"mixins": [
-		"ts_spacetime_traverse.fabric.mixins.json"
-	],
 	"depends": {
 		"fabricloader": ">=${loader_version}",
 		"minecraft": "~${minecraft_version}",

@@ -19,9 +19,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 /**
  * クライアント側でスワップ操作に関するキー入力とアクション処理をするハンドラ
@@ -75,8 +78,7 @@ public class PositionSwapClientHandler {
         if (isPressed && !keyPressed) {
             keyPressed = true;
 
-            boolean ctrlPressed = GLFW.glfwGetKey(Minecraft.getInstance().getWindow().handle(),
-                    GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
+            boolean ctrlPressed = InputConstants.isKeyDown(InputConstants.KEY_LCONTROL);
 
             // ctrlキーが押されていた場合
             if (ctrlPressed) {

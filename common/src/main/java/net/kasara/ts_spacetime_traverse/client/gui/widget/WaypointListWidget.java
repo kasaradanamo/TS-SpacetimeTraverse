@@ -1,5 +1,6 @@
 package net.kasara.ts_spacetime_traverse.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.client.gui.screen.PortalActionScreen;
@@ -46,7 +47,6 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
         private final WaypointListWidget parent;
         public final WaypointData data;
         private final StringWidget nameWidget;
-        private final StringWidget dimensionWidget;
         private final StringWidget positionWidget;
 
         public Entry(WaypointListWidget parent, WaypointData data, Minecraft minecraft) {
@@ -55,7 +55,6 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
 
             // 名前、ディメンション、座標のテキストウィジェットを作成
             this.nameWidget = new StringWidget(Component.literal(data.name()).withStyle(ChatFormatting.WHITE), minecraft.font);
-            this.dimensionWidget = new StringWidget(Component.literal(data.dimension().identifier().toString()).withStyle(ChatFormatting.GRAY), minecraft.font);
             this.positionWidget = new StringWidget(
                     Component.literal("XYZ: " + data.blockPos().getX() +
                             " / " + data.blockPos().getY() +
@@ -104,7 +103,6 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
 
             int maxWidth = getWidth() - 30; // ざっくり
             this.nameWidget.setMaxWidth(maxWidth);
-            this.dimensionWidget.setMaxWidth(maxWidth);
             this.positionWidget.setMaxWidth(maxWidth);
         }
 
@@ -115,7 +113,7 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
 
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-            if (event.button() == 0) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 // 選択とボタン状態更新
                 parent.setSelected(this);
                 parent.parentScreen.updateActionButtons(this);

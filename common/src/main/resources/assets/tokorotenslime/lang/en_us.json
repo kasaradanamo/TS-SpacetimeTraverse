@@ -15,6 +15,7 @@
   "message.tokorotenslime.position_swap_mode": "Position Swap Mode changed to %s!",
   "message.tokorotenslime.not_place_portal": "Waypoint not Quick registered,",
   "message.tokorotenslime.portal_failed": "You can't place a portal here",
+  "message.tokorotenslime.dimension_not_found": "Registered dimension not found",
 
   "screen.tokorotenslime.portal_action.title": "Waypoint List",
   "screen.tokorotenslime.portal_action.place": "Place Portal",

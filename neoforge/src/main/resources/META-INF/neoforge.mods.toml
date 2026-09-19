@@ -10,9 +10,6 @@ iconFile="icon.png"
 authors="${mod_authors}"
 description="${mod_description}"
 
-[[mixins]]
-config="ts_spacetime_traverse.neoforge.mixins.json"
-
 [[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"

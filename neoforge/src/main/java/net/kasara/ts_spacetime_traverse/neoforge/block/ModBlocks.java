@@ -26,7 +26,7 @@ public class ModBlocks {
                     .isValidSpawn((state, level, pos, entityType) -> false)        // スポーン不可
                     .isRedstoneConductor((state, level, pos) -> false) // 衝突判定なし
                     .isSuffocating((state, level, pos) -> false)       // 窒息判定なし
-                    .isViewBlocking((state, level, pos) -> false)      // 視界を遮らない
+                    .isViewBlocking((state, level, pos, aabb) -> false) // 視界を遮らない
             ));
 
     private static DeferredBlock<Block> registerBlock(String name, Function<BlockBehaviour.Properties, Block> factory) {

@@ -164,7 +164,7 @@ public class WaypointFormScreen extends Screen {
                     }
 
                     // 親画面へ戻る
-                    this.minecraft.setScreenAndShow(this.parent);
+                    this.minecraft.gui.setScreen(this.parent);
                 }
         ).width(120).build();
         confirmButton.active = false;
@@ -195,7 +195,7 @@ public class WaypointFormScreen extends Screen {
      */
     @Override
     public void onClose() {
-        this.minecraft.setScreenAndShow(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 
     /**

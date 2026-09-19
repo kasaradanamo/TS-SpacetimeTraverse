@@ -5,16 +5,18 @@ import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.kasara.ts_spacetime_traverse.util.WaypointDataUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.UUID;
 
 /**
  * サーバー側でのポータル生成・消滅・リンク管理を担当するクラス
@@ -40,6 +42,12 @@ public class PortalHandler {
         // Waypoint情報取得
         WaypointData data = WaypointServerManager.get(player, waypointUuid);
         if (data == null) return;
+
+        // 行き先のディメンションが存在しなければ設置しない
+        if (level.getServer().getLevel(data.dimension()) == null) {
+            player.sendSystemMessage(Component.translatable("message.tokorotenslime.dimension_not_found"), true);
+            return;
+        }
 
         // ポータル設置位置を探索
         Vec3 pos = findPortalSpawnPos(player, level, data);
@@ -258,20 +266,6 @@ public class PortalHandler {
      * yawを東西南北の4方向にする
      */
     private static float roundYawToCardinal(float yaw) {
-        yaw = normalizeYaw(yaw);
-
-        if (yaw >= -45f && yaw < 45f) return 0f;        // 南
-        else if (yaw >= 45f && yaw < 135f) return 90f; // 西
-        else if (yaw >= -135f && yaw < -45f) return -90f; // 東
-        else return 180f;                                   // 北
-    }
-
-    /**
-     * yawを-180～180で正規化
-     */
-    private static float normalizeYaw(float yaw) {
-        if (yaw > 180f) return yaw - 360f;
-        if (yaw < -180f) return yaw + 360f;
-        return yaw;
+        return Mth.wrapDegrees(Direction.fromYRot(yaw).toYRot());
     }
 }

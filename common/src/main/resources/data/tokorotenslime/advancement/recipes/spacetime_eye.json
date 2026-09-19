@@ -11,7 +11,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tokorotenslime:spacetime_eye"
+        "recipes": "tokorotenslime:spacetime_eye"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

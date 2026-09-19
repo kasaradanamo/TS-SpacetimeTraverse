@@ -86,7 +86,7 @@ public class PositionSwapServerHandler {
         // 位置交換
         // クライアントに同期
         player.connection.teleport(targetPos.x, targetPos.y, targetPos.z, newPlayerAngles[0], newPlayerAngles[1]);
-        player.hurtMarked = true;
+        player.syncVelocity = true;
         if (isEnhanced) {
             swap(player, targetLevel, targetPos, newPlayerAngles[0], newPlayerAngles[1], targetMotion, targetFall, targetGround, targetPose, targetVehicle);
             swap(target, playerLevel, playerPos, newTargetAngles[0], newTargetAngles[1], playerMotion, playerFall, playerGround, playerPose, playerVehicle);

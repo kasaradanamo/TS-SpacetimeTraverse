@@ -49,7 +49,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
         rot.x = 0;
         rot.z = 0;
         rot.normalize();
-        poseStack.mulPose(rot);
+        poseStack.rotate(rot);
 
         // スケール適応
         float scale = state.scale;
@@ -59,7 +59,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
 
         // 中心を軸に自転
         poseStack.translate(0, HEIGHT / 2, 0);
-        poseStack.mulPose(new Quaternionf().rotateZ(state.spin));
+        poseStack.rotate(new Quaternionf().rotateZ(state.spin));
         poseStack.translate(0, -HEIGHT / 2, 0);
 
         // 描画

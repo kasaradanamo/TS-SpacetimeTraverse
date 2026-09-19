@@ -13,9 +13,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * クライアント側でポータル操作に関するキー入力とアクション処理をするハンドラ
@@ -38,11 +40,10 @@ public class PortalActionClientHandler {
         if (!ClientAdvancementUtil.hasUnlockedSpacetimeAdvancement(minecraft)) return;
 
         // Ctrlキーが押されてるかどうか
-        boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
-                GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
+        boolean ctrlPressed = InputConstants.isKeyDown(InputConstants.KEY_LCONTROL);
 
         if (ctrlPressed) {
-            minecraft.setScreenAndShow(new PortalActionScreen()); // GUIを開く
+            minecraft.gui.setScreen(new PortalActionScreen()); // GUIを開く
         } else {
             // 通常押下:視線上にポータルがあれば消去、なければ設置
             PortalEntity lookedPortal = getLookedPortal(minecraft, player);
@@ -89,7 +90,7 @@ public class PortalActionClientHandler {
         Vec3 end = start.add(direction.scale(maxDistance));
 
         // 視線方向に伸ばした範囲でポータルを検索
-        AABB searchBox = player.getBoundingBox().expandTowards(direction.scale(maxDistance)).inflate(0);
+        AABB searchBox = player.getBoundingBox().expandTowards(direction.scale(maxDistance));
 
         // 自分がオーナーのポータルのみを対象
         List<PortalEntity> portals = minecraft.level.getEntitiesOfClass(

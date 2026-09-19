@@ -26,7 +26,7 @@ public class ModBlocks {
             .isValidSpawn(Blocks::never)        // スポーン不可
             .isRedstoneConductor(Blocks::never) // 衝突判定なし
             .isSuffocating(Blocks::never)       // 窒息判定なし
-            .isViewBlocking(Blocks::never)      // 視界を遮らない
+            .isViewBlocking((state, level, pos, aabb) -> false) // 視界を遮らない
     ));
 
     private static Block registerBlock(String name, Function<BlockBehaviour.Properties, Block> factory) {

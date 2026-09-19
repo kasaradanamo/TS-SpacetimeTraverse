@@ -13,6 +13,8 @@ dependencies {
 
     implementation project(':TokorotenSlime:fabric')
     compileOnly project(':TokorotenSlime:common')
+
+    implementation project(':TS_MultiTools:fabric')
 }
 
 rootProject.ext.configureFabricModule(project, ':TS_SpacetimeTraverse:common')

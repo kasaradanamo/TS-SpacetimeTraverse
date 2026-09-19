@@ -3,12 +3,10 @@ package net.kasara.ts_spacetime_traverse.neoforge;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.client.option.ModKeyMappingsCommon;
 import net.kasara.ts_spacetime_traverse.client.render.entity.PortalRenderer;
-import net.kasara.ts_spacetime_traverse.client.util.ClientAdvancementUtil;
 import net.kasara.ts_spacetime_traverse.network.ModPacketsCommon;
 import net.kasara.ts_spacetime_traverse.neoforge.client.ModClientEvents;
 import net.kasara.ts_spacetime_traverse.neoforge.client.option.ModKeyMappings;
 import net.kasara.ts_spacetime_traverse.neoforge.entity.ModEntities;
-import net.kasara.ts_spacetime_traverse.neoforge.mixin.client.ClientAdvancementManagerAccessor;
 import net.kasara.ts_spacetime_traverse.neoforge.network.ModPackets;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -27,9 +25,6 @@ public class TSSpacetimeTraverseClient {
 
         ModKeyMappingsCommon.POSITION_SWAP = ModKeyMappings.POSITION_SWAP;
         ModKeyMappingsCommon.PORTAL_ACTION = ModKeyMappings.PORTAL_ACTION;
-
-        // 実績進捗取得ブリッジ(Mixinアクセサ経由)
-        ClientAdvancementUtil.GET_PROGRESS_MAP = ca -> ((ClientAdvancementManagerAccessor) ca).getProgress();
 
         // クライアントイベント登録
         ModClientEvents.register();

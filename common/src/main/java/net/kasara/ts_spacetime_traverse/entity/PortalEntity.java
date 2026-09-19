@@ -254,7 +254,7 @@ public class PortalEntity extends Entity {
         // プレイヤーは同期
         if(entity instanceof ServerPlayer player) {
             player.connection.teleport(x, y, z, yaw, pitch);
-            player.hurtMarked = true;
+            player.syncVelocity = true;
         }
 
         TeleportTransition transition = new TeleportTransition(

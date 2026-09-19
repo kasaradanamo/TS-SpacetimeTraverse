@@ -9,7 +9,9 @@ rootProject.ext.loadModProperties(project, 'TS_SpacetimeTraverse')
 rootProject.ext.configureNeoForgeRuns(project, [
         (mod_id)         : [project(':TS_SpacetimeTraverse:common').sourceSets.main],
         'tokorotenslime' : [project(':TokorotenSlime:tokorotenslime-neoforge').sourceSets.main,
-                            project(':TokorotenSlime:common').sourceSets.main]
+                            project(':TokorotenSlime:common').sourceSets.main],
+        'ts_multitools'  : [project(':TS_MultiTools:ts_multitools-neoforge').sourceSets.main,
+                            project(':TS_MultiTools:common').sourceSets.main]
 ])
 
 dependencies {
