@@ -10,7 +10,7 @@ public class ModTags {
 
     public static class Blocks {
 
-        // すり抜けれるブロック
+        // 視線が通るブロック
         public static final TagKey<Block> PASS_THROUGH_BLOCK = createTag("pass_through_block");
 
         private static TagKey<Block> createTag(String name) {

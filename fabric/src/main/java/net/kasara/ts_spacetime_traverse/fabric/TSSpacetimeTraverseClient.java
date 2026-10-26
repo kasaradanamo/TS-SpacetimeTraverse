@@ -16,7 +16,7 @@ public class TSSpacetimeTraverseClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // クライアント→サーバー送信ブリッジ(クライアント専用APIのためここで代入)
+        // クライアント→サーバー送信ブリッジ
         ModPacketsCommon.SEND_TO_SERVER = ClientPlayNetworking::send;
 
         // キーマッピング登録

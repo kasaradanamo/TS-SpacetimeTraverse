@@ -14,6 +14,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -30,8 +31,22 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
         this.centerListVertically = false;
         this.parentScreen = screen;
 
-        // ClientWaypointManagerから全ウェイポイントを取得してEntryを追加
-        WaypointClientCache.getAll().forEach(data -> this.addEntry(new Entry(this, data, minecraft)));
+        refreshEntries();
+    }
+
+    /**
+     * WaypointClientCacheから全ウェイポイントを取得してEntryを作り直す
+     */
+    public void refreshEntries() {
+        this.clearEntries();
+        WaypointClientCache.getAll().forEach(data -> this.addEntry(new Entry(this, data, this.minecraft)));
+        this.setScrollAmount(0);
+    }
+
+    @Override
+    public void setSelected(@Nullable Entry entry) {
+        super.setSelected(entry);
+        parentScreen.updateActionButtons(entry);
     }
 
     /**
@@ -53,7 +68,7 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
             this.parent = parent;
             this.data = data;
 
-            // 名前、ディメンション、座標のテキストウィジェットを作成
+            // 名前、座標のテキストウィジェットを作成
             this.nameWidget = new StringWidget(Component.literal(data.name()).withStyle(ChatFormatting.WHITE), minecraft.font);
             this.positionWidget = new StringWidget(
                     Component.literal("XYZ: " + data.blockPos().getX() +
@@ -114,9 +129,7 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-                // 選択とボタン状態更新
                 parent.setSelected(this);
-                parent.parentScreen.updateActionButtons(this);
                 return true;
             }
             return false;

@@ -21,10 +21,10 @@ public class WaypointNbtUtil {
     private static final String X = "x";           // 座標X
     private static final String Y = "y";           // 座標Y
     private static final String Z = "z";           // 座標Z
-    private static final String YAW = "yaw";       // プレイヤー向き（角度）
+    private static final String YAW = "yaw";       // 到着時の向き（角度）
 
     /**
-     * WaypointData を NbtCompound に変換
+     * WaypointData を CompoundTag に変換
      */
     public static CompoundTag toNbt(WaypointData data) {
         CompoundTag nbt = new CompoundTag();
@@ -43,7 +43,7 @@ public class WaypointNbtUtil {
     }
 
     /**
-     * NbtCompound から WaypointData に復元
+     * CompoundTag から WaypointData に復元
      */
     public static WaypointData fromNbt(CompoundTag nbt) {
         UUID uuid = UUID.fromString(nbt.getString(UUID_KEY).orElseThrow());

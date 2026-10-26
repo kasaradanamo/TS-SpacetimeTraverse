@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class ModServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
-        // クライアントにnbt情報を伝える
+        // クライアントにウェイポイント情報を送る
         WaypointInfoS2CPacket.send(player, WaypointServerManager.getAll(player), WaypointServerManager.getQuick(player));
 
         // クライアントにディメンションリストを送る
@@ -51,6 +52,12 @@ public class ModServerEvents {
         PortalHandler.discardOwnedPortals(player.level().getServer(), uuid);
     }
 
+    // サーバーが起動したとき
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        DimensionListSender.watchBorders(event.getServer());
+    }
+
     // サーバーが終了するとき
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent event) {
@@ -58,7 +65,7 @@ public class ModServerEvents {
         PortalHandler.discardAllPortals(event.getServer());
     }
 
-    // プレイヤーエンティティがコピーされるとき(死亡・ディメンション移動など)
+    // 死亡やエンドからの帰還でプレイヤーが作り直されるとき
     @SubscribeEvent
     public static void onClone(PlayerEvent.Clone event) {
         if (!(event.getOriginal() instanceof ServerPlayer oldPlayer)) return;

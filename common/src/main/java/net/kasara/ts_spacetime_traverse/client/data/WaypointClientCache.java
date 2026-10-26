@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 public final class WaypointClientCache {
 
-    //  UUIDをキーにしたウェイポイントマップ（順序保持）
+    // UUIDをキーにしたウェイポイントマップ（順序保持）
     private static final Map<UUID, WaypointData> waypointMap = new LinkedHashMap<>();
 
     // クイックウェイポイントのUUID
@@ -74,11 +74,11 @@ public final class WaypointClientCache {
      * @param data 追加・更新する WaypointData
      */
     public static void upsert(WaypointData data) {
-        waypointMap.put(data.uuid(), data);
         // 最初の追加の場合は自動でクイックウェイポイントに設定
-        if (waypointMap.size() == 1 && quickUuid == null) {
+        if (waypointMap.isEmpty()) {
             quickUuid = data.uuid();
         }
+        waypointMap.put(data.uuid(), data);
     }
 
     /**

@@ -12,9 +12,9 @@ import net.minecraft.client.KeyMapping;
  */
 public class ModKeyMappings {
 
-    // モード切替用のキー
+    // 位置入れ替え用のキー
     public static KeyMapping POSITION_SWAP;
-    // ポータル出現
+    // ポータル操作用のキー
     public static KeyMapping PORTAL_ACTION;
 
     /**

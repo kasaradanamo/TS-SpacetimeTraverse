@@ -13,7 +13,7 @@
   "mode.tokorotenslime.position_swap.enhanced": "Enhanced",
 
   "message.tokorotenslime.position_swap_mode": "Position Swap Mode changed to %s!",
-  "message.tokorotenslime.not_place_portal": "Waypoint not Quick registered,",
+  "message.tokorotenslime.not_place_portal": "Waypoint not Quick registered",
   "message.tokorotenslime.portal_failed": "You can't place a portal here",
   "message.tokorotenslime.dimension_not_found": "Registered dimension not found",
 
@@ -35,6 +35,6 @@
   "screen.tokorotenslime.waypoint_register.west": "West",
   "screen.tokorotenslime.waypoint_edit.save": "Save",
 
-  "screen.tokorotenslime.portal_action.delete.message": "Are you sure you want ot delete this waypoint?",
+  "screen.tokorotenslime.portal_action.delete.message": "Are you sure you want to delete this waypoint?",
   "screen.tokorotenslime.portal_action.delete.cancel": "Cancel"
 }

@@ -23,7 +23,7 @@ public class ModPackets {
     private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
 
-        // c2s (受信ハンドラのplayer()はサーバーバウンドではServerPlayerを返す)
+        // c2s
         registrar.playToServer(PositionSwapC2SPacket.ID, PositionSwapC2SPacket.STREAM_CODEC,
                 (packet, context) -> PositionSwapC2SPacket.receive(packet, (ServerPlayer) context.player()));
         registrar.playToServer(PositionSwapModeC2SPacket.ID, PositionSwapModeC2SPacket.STREAM_CODEC,

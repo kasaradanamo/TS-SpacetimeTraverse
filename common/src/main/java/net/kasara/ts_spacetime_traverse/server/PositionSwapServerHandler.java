@@ -29,7 +29,7 @@ public class PositionSwapServerHandler {
      * @param targetId 対象エンティティのID
      * @param dimension 対象エンティティが存在するワールドの名前
      * @param player 操作するプレイヤー
-     * @param random ランダム補正を行うか
+     * @param random 相手をランダムに選んだか
      */
     public static void positionSwap(int targetId, ResourceKey<Level> dimension, ServerPlayer player, boolean random) {
         // レベル取得
@@ -42,7 +42,7 @@ public class PositionSwapServerHandler {
 
         // ターゲットエンティティ取得
         Entity target = targetLevel.getEntity(targetId);
-        if (target == null || target == player) return;    // ターゲットが存在しないor自分自身なら終了
+        if (target == null || target == player || target == player.getVehicle()) return;    // ターゲットが存在しないor自分自身or自分の乗り物なら終了
 
         // プレイヤーとターゲットの現在位置を取得
         Vec3 playerPos = player.position();
@@ -50,12 +50,12 @@ public class PositionSwapServerHandler {
 
         // プレイヤーの角度（yaw/pitch）を決定
         // randomがtrueならターゲットからプレイヤー方向を向く角度を計算
-        // 投射物の場合はそのまま、それ以外はターゲットの角度を使用
+        // 矢・トライデントの場合はそのまま、それ以外はターゲットの角度を使用
         float[] newPlayerAngles = (random) ? lookTarget(playerPos, targetPos) : (target instanceof AbstractArrow)
                 ? new float[]{player.getYRot(), player.getXRot()} : new float[]{target.getYRot(), target.getXRot()};
 
         // ターゲットの角度を決定
-        // 投射物の場合はそのまま、それ以外はプレイヤーの角度を使用
+        // 矢・トライデントの場合はそのまま、それ以外はプレイヤーの角度を使用
         float[] newTargetAngles = (target instanceof AbstractArrow)
                 ? new float[]{target.getYRot(), target.getXRot()} : new float[]{player.getYRot(), player.getXRot()};
 
@@ -63,11 +63,11 @@ public class PositionSwapServerHandler {
         Vec3 playerMotion = target instanceof WindCharge && isEnhanced ? new Vec3(0, -2, 0) : player.getDeltaMovement();
         Vec3 targetMotion = target.getDeltaMovement();
 
-        // 高さ
-        double playerFall = player.fallDistance;
+        // 落下距離
+        double playerFall = target instanceof LivingEntity ? player.fallDistance : 0;
         double targetFall = target.fallDistance;
 
-        // 空中かどうか
+        // 接地しているか
         boolean playerGround = player.onGround();
         boolean targetGround = target.onGround();
 
@@ -84,9 +84,6 @@ public class PositionSwapServerHandler {
         target.stopRiding();
 
         // 位置交換
-        // クライアントに同期
-        player.connection.teleport(targetPos.x, targetPos.y, targetPos.z, newPlayerAngles[0], newPlayerAngles[1]);
-        player.syncVelocity = true;
         if (isEnhanced) {
             swap(player, targetLevel, targetPos, newPlayerAngles[0], newPlayerAngles[1], targetMotion, targetFall, targetGround, targetPose, targetVehicle);
             swap(target, playerLevel, playerPos, newTargetAngles[0], newTargetAngles[1], playerMotion, playerFall, playerGround, playerPose, playerVehicle);
@@ -103,8 +100,8 @@ public class PositionSwapServerHandler {
     /**
      * 2点間の方向を向くためのyaw/pitchを計算
      *
-     * @param playerPos 起点の座標
-     * @param targetPos   目標座標
+     * @param playerPos 見る先の座標
+     * @param targetPos   起点の座標
      * @return {yaw, pitch}
      */
     private static float[] lookTarget(Vec3 playerPos, Vec3 targetPos) {
@@ -127,8 +124,8 @@ public class PositionSwapServerHandler {
      * @param yaw 回転角度(水平)
      * @param pitch 回転角度(垂直)
      * @param motion 速度
-     * @param fallDistance 高さレベル
-     * @param ground 飛んでるか
+     * @param fallDistance 落下距離
+     * @param ground 接地しているか
      * @param pose ポーズ(スニーク状態か、泳いでるかなど)
      * @param vehicle 騎乗エンティティ
      */
@@ -148,8 +145,8 @@ public class PositionSwapServerHandler {
         );
 
         entity.teleport(transition);        // 位置や向きなど適応
-        entity.fallDistance = fallDistance; // 高さ適応
-        entity.setOnGround(ground);         // 空中かどうか適応
+        entity.fallDistance = fallDistance; // 落下距離適応
+        entity.setOnGround(ground);         // 接地状態適応
         entity.setPose(pose);               // ポーズ適応
 
         // 騎乗関係再構築

@@ -70,14 +70,9 @@ public class PortalHandler {
     public static void vanishOwnedPortals(ServerPlayer player) {
         PortalEntity portal = PortalManager.getActivePlacePortal(player.getUUID());
         if (portal == null) return;
-        if (!(player.getUUID().equals(portal.getOwnerUuid()))) return;
 
+        // リンクされている戻りポータルも同時に消える
         portal.startVanish(portal.level().getGameTime());
-
-        // リンクされている戻りポータルも同時に消す
-        PortalEntity linkPortal = portal.getLinkedPortal();
-        if (linkPortal == null || !(player.getUUID().equals(linkPortal.getOwnerUuid()))) return;
-        linkPortal.startVanish(linkPortal.level().getGameTime());
     }
 
     /**
@@ -106,7 +101,7 @@ public class PortalHandler {
     /**
      * ポータル侵入時に、戻り用ポータルを生成する処理
      *
-     * @param inEntity ポータルに入ったエンティティ
+     * @param inEntity 送ったエンティティ
      * @param enteredPortal 入ってきたポータル
      */
     public static void handlePortalEntry(Entity inEntity, PortalEntity enteredPortal) {
@@ -162,7 +157,7 @@ public class PortalHandler {
      * @param level スポーンさせるワールド
      * @param pos スポーン位置
      * @param waypoint 行き先Waypoint情報
-     * @param enteredPortal 既存ポータルから生成されたかどうか（戻りポータル用）
+     * @param enteredPortal 入ってきたポータル(プレイヤーが設置する時はnull)
      */
     private static PortalEntity spawnPortal(Entity entity, ServerLevel level, Vec3 pos, WaypointData waypoint, @Nullable PortalEntity enteredPortal) {
         PortalEntity portal = new PortalEntity(ModEntitiesCommon.PORTAL, level);
@@ -208,7 +203,7 @@ public class PortalHandler {
         for (double f : forwardOffsets) {
             for (double h : heightOffsets) {
                 Vec3 pos = eyePos.add(0, h, 0).add(look.scale(f));
-                if (forbiddenBox.contains(pos)) continue;
+                if (data.dimension().equals(level.dimension()) && forbiddenBox.contains(pos)) continue;
 
                 AABB box = new AABB(
                         pos.x - 0.2, pos.y - PLAYER_PLACE_Y_OFFSET, pos.z - 0.2,
@@ -220,12 +215,20 @@ public class PortalHandler {
                 // エンティティとの重なりは、実際に設置されるポータルの当たり判定で見る
                 AABB portalBox = PortalEntity.createHitbox(
                         new Vec3(pos.x, pos.y - PLAYER_PLACE_Y_OFFSET, pos.z));
-                if (!level.getEntities(null, portalBox).isEmpty()) return null;
+                if (!level.getEntities((Entity) null, portalBox, entity -> !isVanishingOwnPortal(entity, player)).isEmpty()) return null;
 
                 return pos;
             }
         }
         return null;
+    }
+
+    /**
+     * 自分の消えかけのポータル
+     */
+    private static boolean isVanishingOwnPortal(Entity entity, ServerPlayer player) {
+        return entity instanceof PortalEntity portal && portal.isVanishing()
+                && player.getUUID().equals(portal.getOwnerUuid());
     }
 
     /**

@@ -124,20 +124,8 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
         long spawnTick = entity.getSpawnTick();
         float now = entity.level().getGameTime() + partialTicks;
 
-        // スポーン前の初期化
-        if (spawnTick <= 0) {
-            state.scale = 0.0f;
-            state.spin = 0.0f;
-            state.entityPos = entity.getPosition(partialTicks);
-
-            state.ownerName = entity.getOwnerName();
-            state.waypointName = entity.getWaypointName();
-            state.posText = entity.getTargetPosText();
-            return;
-        }
-
-        state.scale = getScale(entity, now, spawnTick);
-        state.spin = now * SPIN_SPEED;
+        state.scale = spawnTick <= 0 ? 0.0f : getScale(entity, now, spawnTick);
+        state.spin = spawnTick <= 0 ? 0.0f : now * SPIN_SPEED;
         state.entityPos = entity.getPosition(partialTicks);
 
         state.ownerName = entity.getOwnerName();
@@ -156,7 +144,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
     private float getScale(PortalEntity entity, float now, long spawnTick) {
         float scale;
 
-        // 消失アニメーション中
+        // 消滅アニメーション中
         if (entity.isVanishing()) {
             float elapsed = now - entity.getVanishStartTick();
 

@@ -36,10 +36,10 @@ public class PortalActionClientHandler {
 
         if (!pushKey()) return; // 押された瞬間のみtrue
 
-        // 対応する実績を解除してない場合使用不可
+        // 対応する進捗を解除してない場合使用不可
         if (!ClientAdvancementUtil.hasUnlockedSpacetimeAdvancement(minecraft)) return;
 
-        // Ctrlキーが押されてるかどうか
+        // 左Ctrlキーが押されてるかどうか
         boolean ctrlPressed = InputConstants.isKeyDown(InputConstants.KEY_LCONTROL);
 
         if (ctrlPressed) {
@@ -56,8 +56,8 @@ public class PortalActionClientHandler {
     }
 
     /**
-     * フレーム内でキーが押されたか判定
-     * @return 押されてたらtrue、押されてなかったらfalse
+     * キーの押し始めか判定
+     * @return 押し始めならtrue、それ以外はfalse
      */
     private static boolean pushKey() {
         boolean isPressed = ModKeyMappingsCommon.PORTAL_ACTION.isDown();
@@ -84,7 +84,7 @@ public class PortalActionClientHandler {
 
         double maxDistance = 64.0;
 
-        // 視線の開始点（カメラ位置）と方向ベクトル
+        // 視線の開始点（目の位置）と方向ベクトル
         Vec3 start = player.getEyePosition();
         Vec3 direction = player.getViewVector(1.0f);
         Vec3 end = start.add(direction.scale(maxDistance));

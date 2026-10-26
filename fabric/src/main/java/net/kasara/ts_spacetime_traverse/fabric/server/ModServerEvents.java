@@ -26,7 +26,7 @@ public class ModServerEvents {
         // プレイヤーがサーバーに参加したときの処理
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayer player = handler.getPlayer();
-            // クライアントにnbt情報を伝える
+            // クライアントにウェイポイント情報を送る
             WaypointInfoS2CPacket.send(player, WaypointServerManager.getAll(player), WaypointServerManager.getQuick(player));
 
             // クライアントにディメンションリストを送る
@@ -40,13 +40,16 @@ public class ModServerEvents {
             PortalHandler.discardOwnedPortals(server, uuid);
         });
 
+        // サーバーが起動したとき
+        ServerLifecycleEvents.SERVER_STARTED.register(DimensionListSender::watchBorders);
+
         // サーバーが終了するとき
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             // 全てのポータルを削除
             PortalHandler.discardAllPortals(server);
         });
 
-        // プレイヤーエンティティがコピーされるとき（死亡・ディメンション移動など）
+        // 死亡やエンドからの帰還でプレイヤーが作り直されるとき
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             // Waypointデータを新しいプレイヤーに引き継ぐ
             WaypointServerManager.copyFrom(oldPlayer, newPlayer);
