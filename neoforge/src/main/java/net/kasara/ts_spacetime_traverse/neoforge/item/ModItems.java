@@ -16,7 +16,7 @@ public class ModItems {
     public static final DeferredRegister.Items ITEMS =
             DeferredRegister.createItems(TokorotenSlimeAPI.getModId());
 
-    // 時空の目アイテムの登録
+    // 時空の眼アイテムの登録
     public static final DeferredItem<Item> SPACETIME_EYE = registerItemAndAddToTab("spacetime_eye",
             pros -> new SpacetimeEyeItem(pros.fireResistant().rarity(Rarity.EPIC)));
 
@@ -28,7 +28,7 @@ public class ModItems {
     }
 
     /**
-     * 登録確認用のログ出力
+     * ModItemsの登録処理を呼び出す
      */
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

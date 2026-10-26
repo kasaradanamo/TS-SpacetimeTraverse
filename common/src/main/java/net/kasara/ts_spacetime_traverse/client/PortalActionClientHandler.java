@@ -13,9 +13,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * クライアント側でポータル操作に関するキー入力とアクション処理をするハンドラ
@@ -34,12 +36,11 @@ public class PortalActionClientHandler {
 
         if (!pushKey()) return; // 押された瞬間のみtrue
 
-        // 対応する実績を解除してない場合使用不可
+        // 対応する進捗を解除してない場合使用不可
         if (!ClientAdvancementUtil.hasUnlockedSpacetimeAdvancement(minecraft)) return;
 
-        // Ctrlキーが押されてるかどうか
-        boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
-                GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
+        // 左Ctrlキーが押されてるかどうか
+        boolean ctrlPressed = InputConstants.isKeyDown(minecraft.getWindow(), InputConstants.KEY_LCONTROL);
 
         if (ctrlPressed) {
             minecraft.setScreen(new PortalActionScreen()); // GUIを開く
@@ -55,8 +56,8 @@ public class PortalActionClientHandler {
     }
 
     /**
-     * フレーム内でキーが押されたか判定
-     * @return 押されてたらtrue、押されてなかったらfalse
+     * キーの押し始めか判定
+     * @return 押し始めならtrue、それ以外はfalse
      */
     private static boolean pushKey() {
         boolean isPressed = ModKeyMappingsCommon.PORTAL_ACTION.isDown();
@@ -83,13 +84,13 @@ public class PortalActionClientHandler {
 
         double maxDistance = 64.0;
 
-        // 視線の開始点（カメラ位置）と方向ベクトル
+        // 視線の開始点（目の位置）と方向ベクトル
         Vec3 start = player.getEyePosition();
         Vec3 direction = player.getViewVector(1.0f);
         Vec3 end = start.add(direction.scale(maxDistance));
 
         // 視線方向に伸ばした範囲でポータルを検索
-        AABB searchBox = player.getBoundingBox().expandTowards(direction.scale(maxDistance)).inflate(0);
+        AABB searchBox = player.getBoundingBox().expandTowards(direction.scale(maxDistance));
 
         // 自分がオーナーのポータルのみを対象
         List<PortalEntity> portals = minecraft.level.getEntitiesOfClass(

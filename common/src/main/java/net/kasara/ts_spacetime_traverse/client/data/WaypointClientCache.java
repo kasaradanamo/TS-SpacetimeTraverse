@@ -3,14 +3,18 @@ package net.kasara.ts_spacetime_traverse.client.data;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * クライアント側でのウェイポイントキャッシュ
  */
 public final class WaypointClientCache {
 
-    //  UUIDをキーにしたウェイポイントマップ（順序保持）
+    // UUIDをキーにしたウェイポイントマップ（順序保持）
     private static final Map<UUID, WaypointData> waypointMap = new LinkedHashMap<>();
 
     // クイックウェイポイントのUUID
@@ -70,11 +74,11 @@ public final class WaypointClientCache {
      * @param data 追加・更新する WaypointData
      */
     public static void upsert(WaypointData data) {
-        waypointMap.put(data.uuid(), data);
         // 最初の追加の場合は自動でクイックウェイポイントに設定
-        if (waypointMap.size() == 1 && quickUuid == null) {
+        if (waypointMap.isEmpty()) {
             quickUuid = data.uuid();
         }
+        waypointMap.put(data.uuid(), data);
     }
 
     /**
@@ -88,14 +92,6 @@ public final class WaypointClientCache {
         if (uuid.equals(quickUuid)) {
             quickUuid = null;
         }
-    }
-
-    /**
-     * キャッシュを完全にクリア
-     */
-    public static void clear() {
-        waypointMap.clear();
-        quickUuid = null;
     }
 
     private WaypointClientCache() {}

@@ -6,16 +6,15 @@ import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.tokorotenslime.api.TokorotenSlimeClientAPI;
 import net.kasara.ts_spacetime_traverse.fabric.TSSpacetimeTraverse;
 import net.minecraft.client.KeyMapping;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * キーマッピング登録クラス
  */
 public class ModKeyMappings {
 
-    // モード切替用のキー
+    // 位置入れ替え用のキー
     public static KeyMapping POSITION_SWAP;
-    // ポータル出現
+    // ポータル操作用のキー
     public static KeyMapping PORTAL_ACTION;
 
     /**
@@ -25,14 +24,14 @@ public class ModKeyMappings {
         POSITION_SWAP = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.tokorotenslime.position_swap",  // キー名（翻訳用）
                 InputConstants.Type.KEYSYM,                // キーの種類
-                GLFW.GLFW_KEY_R,                           // デフォルトのキー
+                InputConstants.KEY_R,                      // デフォルトのキー
                 TokorotenSlimeClientAPI.getKeyMappingCategory()  // カテゴリ名（オプション画面で表示されるグループ）
         ));
 
         PORTAL_ACTION = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.tokorotenslime.portal_action",   // キー名（翻訳用）
                 InputConstants.Type.KEYSYM,                 // キーの種類
-                GLFW.GLFW_KEY_C,                            // デフォルトのキー
+                InputConstants.KEY_C,                       // デフォルトのキー
                 TokorotenSlimeClientAPI.getKeyMappingCategory()   // カテゴリ名（オプション画面で表示されるグループ）
         ));
 

@@ -18,7 +18,7 @@ public class TSSpacetimeTraverseClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // クライアント→サーバー送信ブリッジ(クライアント専用APIのためここで代入)
+        // クライアント→サーバー送信ブリッジ
         ModPacketsCommon.SEND_TO_SERVER = ClientPlayNetworking::send;
 
         // キーマッピング登録
@@ -26,7 +26,7 @@ public class TSSpacetimeTraverseClient implements ClientModInitializer {
         ModKeyMappingsCommon.POSITION_SWAP = ModKeyMappings.POSITION_SWAP;
         ModKeyMappingsCommon.PORTAL_ACTION = ModKeyMappings.PORTAL_ACTION;
 
-        // 実績進捗取得ブリッジ(Mixinアクセサ経由)
+        // 進捗取得ブリッジ(Mixinアクセサ経由)
         ClientAdvancementUtil.GET_PROGRESS_MAP = ca -> ((ClientAdvancementManagerAccessor) ca).getProgress();
 
         // クライアントイベント登録

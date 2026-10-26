@@ -22,7 +22,7 @@ public class ModEntities {
                     MobCategory.MISC,
                     builder -> builder
                             .noLootTable()                          // 死亡時にドロップなし
-                            .sized(1.0F, 2.0F)          // ヒットボックスの幅・高さ
+                            .sized(1.0F, 2.0F)
                             .clientTrackingRange(8)   // サーバーとの同期範囲
                             .updateInterval(20)                     // 同期間隔
             );

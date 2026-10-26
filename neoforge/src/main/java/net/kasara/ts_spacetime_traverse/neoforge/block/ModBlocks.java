@@ -17,14 +17,14 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(TokorotenSlimeAPI.getModId());
 
-    // ポータルくぐった際足元何もなかった時に出てくる一時ブロック
+    // 転送先の足元に置く一時ブロック
     public static final DeferredBlock<Block> VOID_BLOCK =
             registerBlock("void_block", pros -> new VoidBlock(pros
                     .strength(-1.0F, 3600000.0F)    // 岩盤と同じ
                     .noLootTable()                      // ドロップなし
                     .noOcclusion()                      // 透過ブロック
                     .isValidSpawn((state, level, pos, entityType) -> false)        // スポーン不可
-                    .isRedstoneConductor((state, level, pos) -> false) // 衝突判定なし
+                    .isRedstoneConductor((state, level, pos) -> false) // レッドストーン非導通
                     .isSuffocating((state, level, pos) -> false)       // 窒息判定なし
                     .isViewBlocking((state, level, pos) -> false)      // 視界を遮らない
             ));

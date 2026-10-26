@@ -4,9 +4,10 @@ import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.ApplyWaypointChangeC2SPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.c2s.RegisterQuickC2SPacket;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * クライアント側のウェイポイント管理クラス
@@ -45,7 +46,6 @@ public class WaypointClientManager {
      * @param quickUuid サーバーが指定するクイックウェイポイントのUUID
      */
     public static void waypointInfo(List<WaypointData> waypoints, @Nullable UUID quickUuid) {
-        WaypointClientCache.clear();
         WaypointClientCache.setAll(waypoints);
         WaypointClientCache.setQuick(quickUuid);
     }
