@@ -11,7 +11,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public record DimensionListS2CPacket(Map<Identifier, DimensionBounds> dimensions) implements CustomPacketPayload {
 

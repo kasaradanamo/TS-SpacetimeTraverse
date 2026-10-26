@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * ポータルくぐった際足元に何もなかった時に出てくる一時ブロック
+ * 転送先の足元に置く一時ブロック
  */
 public class VoidBlock extends TransparentBlock implements EntityBlock {
 

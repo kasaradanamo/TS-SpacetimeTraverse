@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public class ClientAdvancementUtil {
 
-    // 使用可能かどうかを判定するための実績ID
+    // 使用可能かどうかを判定するための進捗ID
     private static final Identifier SPACETIME_ADVANCEMENT =
             Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), "use_spacetime_eye");
 
@@ -20,9 +20,9 @@ public class ClientAdvancementUtil {
     public static Function<ClientAdvancements, Map<AdvancementHolder, AdvancementProgress>> GET_PROGRESS_MAP;
 
     /**
-     * クライアント側の実績情報を使って、特定の実績が解除済みかどうか判定
+     * クライアント側の進捗情報を使って、特定の進捗が解除済みかどうか判定
      *
-     * @return 実績が解除されてればtrue、されてなければfalse
+     * @return 進捗が解除されてればtrue、されてなければfalse
      */
     public static boolean hasUnlockedSpacetimeAdvancement(Minecraft minecraft) {
         if (minecraft == null || minecraft.player == null || minecraft.getConnection() == null) return false;

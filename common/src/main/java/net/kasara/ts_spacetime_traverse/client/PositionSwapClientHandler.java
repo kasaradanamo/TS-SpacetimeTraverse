@@ -19,22 +19,25 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 /**
  * クライアント側でスワップ操作に関するキー入力とアクション処理をするハンドラ
  */
 public class PositionSwapClientHandler {
 
-    // モード切替キーが押下中かどうか（押下判定の連打防止用）
+    // 位置入れ替えキーが押下中かどうか（押下判定の連打防止用）
     private static boolean keyPressed = false;
 
     private static final Random RANDOM = new Random();
 
     /**
-     * 毎ティックClientEventsから呼ばれる
+     * 毎ティックModClientEventsから呼ばれる
      */
     public static void handleSwapPositions(Minecraft minecraft) {
         Player player = minecraft.player;
@@ -44,7 +47,7 @@ public class PositionSwapClientHandler {
         List<Entity> rangeEntities = new ArrayList<>();
         getRangeEntities(minecraft, player, rangeEntities);
 
-        // 視線に最も近いエンティティを取得
+        // 視線上で最も近いエンティティ
         Entity target = selectEntity(player, rangeEntities);
         if (target == null) return;
 
@@ -69,16 +72,15 @@ public class PositionSwapClientHandler {
      * キーの押し始めのみtrue
      */
     private static boolean pushKey() {
-        // 現在のフレームでキーが押されているかどうかを取得
+        // 現在キーが押されているかどうかを取得
         boolean isPressed = ModKeyMappingsCommon.POSITION_SWAP.isDown();
 
         if (isPressed && !keyPressed) {
             keyPressed = true;
 
-            boolean ctrlPressed = GLFW.glfwGetKey(Minecraft.getInstance().getWindow().handle(),
-                    GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
+            boolean ctrlPressed = InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), InputConstants.KEY_LCONTROL);
 
-            // ctrlキーが押されていた場合
+            // 左Ctrlキーが押されていた場合
             if (ctrlPressed) {
                 // 進捗確認
                 if (!ClientAdvancementUtil.hasUnlockedSpacetimeAdvancement(Minecraft.getInstance())) return false;
@@ -100,8 +102,10 @@ public class PositionSwapClientHandler {
         Level level = minecraft.level;
         if (level == null) return;
 
+        Entity playerVehicle = player.getVehicle();
         AABB searchBox = player.getBoundingBox().inflate(30);
         for (Entity entity : level.getEntities(player, searchBox)) {
+            if (entity == playerVehicle) continue;                          // 乗っているエンティティ
             if (entity instanceof PortalEntity) continue;                   // 特定のエンティティ判定
             if (hasObstacleInSight(minecraft, entity, player)) continue;    // ブロックの判定
             rangeEntities.add(entity);
@@ -141,14 +145,12 @@ public class PositionSwapClientHandler {
         Entity closestEntity = null;
         double closestDistanceSqr = 900;    // 最大30ブロック
 
-        // 矢を一時的に貯めるリスト
+        // 投射物を一時的に貯めるリスト
         List<Entity> arrowCandidates = new ArrayList<>();
 
         // ---1回目の判定---
         for (Entity entity : rangeEntities) {
-            if (entity == player) continue;
-
-            // 矢は後回し
+            // 投射物は後回し
             if (entity.is(EntityTypeTags.IMPACT_PROJECTILES)) {
                 arrowCandidates.add(entity);
                 continue;
@@ -164,10 +166,10 @@ public class PositionSwapClientHandler {
             }
         }
 
-        // ---2回目の判定（矢用）---
+        // ---2回目の判定（投射物用）---
         if (closestEntity == null) {
             for (Entity arrow : arrowCandidates) {
-                Optional<Vec3> hitPos = arrow.getBoundingBox().inflate(1.5).clip(start, end);   // 矢だけ広めにする
+                Optional<Vec3> hitPos = arrow.getBoundingBox().inflate(1.5).clip(start, end);   // 投射物だけ広めにする
                 if (hitPos.isPresent()) {
                     double distanceSqr = start.distanceToSqr(hitPos.get());
                     if (distanceSqr < closestDistanceSqr) {
@@ -182,13 +184,10 @@ public class PositionSwapClientHandler {
     }
 
     /**
-     * 距離で分類し、10～20ブロックの中距離帯があればその中からランダム、それ以外は全体からランダム選択
-     * リストからランダムに1体選ぶ。ただし、プレイヤーは除外（他プレイヤーを誤って選ばないように）
+     * 距離で分類し、10ブロックより遠く20ブロック以下の中距離帯があればその中からランダム、それ以外は全体からランダム選択
+     * リストからランダムに1体選ぶ。ただし、プレイヤーは除外
      */
     private static Entity divideRangeEntities(Player player, List<Entity> rangeEntities) {
-        // プレイヤーが乗ってるエンティティ
-        Entity playerVehicle = player.getVehicle();
-
         Entity midCandidate = null;
         int midCount = 0;
 
@@ -196,12 +195,12 @@ public class PositionSwapClientHandler {
         int fallbackCount = 0;
 
         for (Entity entity : rangeEntities) {
-            // プレイヤー自身とプレイヤーの乗ってるエンティティは除外
-            if (entity instanceof Player || entity == playerVehicle) continue;
+            // プレイヤーは除外
+            if (entity instanceof Player) continue;
 
             double d = player.distanceToSqr(entity);
 
-            // 10ブロック以上、20ブロック以下の範囲
+            // 10ブロックより遠く、20ブロック以下の範囲
             if (d > 100 && d <= 400) {
                 midCount++;
                 if (RANDOM.nextInt(midCount) == 0) {
