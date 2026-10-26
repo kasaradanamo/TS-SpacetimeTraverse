@@ -26,7 +26,7 @@ public class TSSpacetimeTraverseClient {
         ModKeyMappingsCommon.POSITION_SWAP = ModKeyMappings.POSITION_SWAP;
         ModKeyMappingsCommon.PORTAL_ACTION = ModKeyMappings.PORTAL_ACTION;
 
-        // 実績進捗取得ブリッジ(Mixinアクセサ経由)
+        // 進捗取得ブリッジ(Mixinアクセサ経由)
         ClientAdvancementUtil.GET_PROGRESS_MAP = ca -> ((ClientAdvancementManagerAccessor) ca).getProgress();
 
         // クライアントイベント登録

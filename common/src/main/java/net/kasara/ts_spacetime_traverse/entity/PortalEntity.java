@@ -6,6 +6,7 @@ import net.kasara.ts_spacetime_traverse.server.PortalManager;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -19,8 +20,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -28,6 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Comparator;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -80,7 +84,7 @@ public class PortalEntity extends Entity {
     }
 
     /**
-     * DataTracker初期化
+     * SynchedEntityData初期化
      */
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder entityData) {
@@ -140,6 +144,12 @@ public class PortalEntity extends Entity {
 
         if (!(level() instanceof ServerLevel serverLevel)) return;
 
+        // 所有者なし
+        if (getOwnerUuid() == null) {
+            discard();
+            return;
+        }
+
         long worldTime = serverLevel.getGameTime();
 
         // 初回 tick で spawnTick を確定
@@ -156,9 +166,16 @@ public class PortalEntity extends Entity {
             if (targetLevel != null) {
                 AABB portalBox = this.getBoundingBox();
 
+                Set<Entity> sent = new HashSet<>();
                 for (Entity entity : level().getEntities(this, portalBox.inflate(3))) {
-                    if (!(entity instanceof PortalEntity) && shouldTeleport(entity, portalBox)) {
-                        teleport(entity, targetLevel);
+                    // 送った乗り物に乗っていたもの
+                    if (entity.isRemoved() || entity.level() != level()) continue;
+
+                    // 乗り物ごと
+                    Entity root = entity.getRootVehicle();
+                    if (!sent.contains(root) && shouldTeleport(entity, root, portalBox)) {
+                        sent.add(root);
+                        teleport(root, targetLevel);
                     }
                 }
             }
@@ -190,7 +207,7 @@ public class PortalEntity extends Entity {
     }
 
     /**
-     * 消滅処開始
+     * 消滅処理開始
      *
      * @param worldTime 消滅を始めたワールド時間
      */
@@ -221,7 +238,10 @@ public class PortalEntity extends Entity {
     /**
      * ポータルに入るかの判定
      */
-    private boolean shouldTeleport(Entity entity, AABB portalBox) {
+    private boolean shouldTeleport(Entity entity, Entity root, AABB portalBox) {
+        // ポータルに入れないもの
+        if (!root.canUsePortal(true) || root instanceof EnderDragonPart) return false;
+
         // 接触判定
         if (entity.getBoundingBox().intersects(portalBox)) {
             return true;
@@ -237,7 +257,7 @@ public class PortalEntity extends Entity {
     /**
      * ワープ処理
      *
-     * @param entity 入ったEntity
+     * @param entity 送るエンティティ
      * @param targetLevel 行き先のサーバーワールド
      */
     private void teleport(Entity entity, ServerLevel targetLevel) {
@@ -254,14 +274,10 @@ public class PortalEntity extends Entity {
         Vec3 motion = entity.getDeltaMovement().yRot((float) Math.toRadians(yaw - entity.getYRot()));
 
         // 足場用の VoidBlock を配置
-        if (entity instanceof LivingEntity le && !le.isFallFlying()) {
+        boolean fallFlying = entity instanceof LivingEntity le && le.isFallFlying();
+        if (!fallFlying && entity.getSelfAndPassengers().anyMatch(e -> e instanceof LivingEntity)) {
             tryPlaceVoidBlock(targetLevel, targetBlockPos);
             motion = new Vec3(0, 0, 0);
-        }
-
-        // プレイヤーは同期
-        if(entity instanceof ServerPlayer player) {
-            player.connection.teleport(x, y, z, yaw, pitch);
         }
 
         DimensionTransition transition = new DimensionTransition(
@@ -273,10 +289,17 @@ public class PortalEntity extends Entity {
                 DimensionTransition.PLACE_PORTAL_TICKET
         );
 
-        entity.changeDimension(transition);
-        entity.setDeltaMovement(motion);   // ServerPlayer#changeDimensionはtransitionのspeedを捨てる
-        entity.hurtMarked = true;
-        entity.fallDistance = 0.0f;
+        Entity teleported = entity.changeDimension(transition);
+        if (teleported != null) {
+            teleported.setDeltaMovement(motion);
+            teleported.hurtMarked = true;
+            teleported.fallDistance = 0.0f;
+
+            // 操作中の乗り物の位置をクライアントに送る
+            if (targetLevel == level() && teleported.getControllingPassenger() instanceof ServerPlayer player) {
+                player.connection.send(new ClientboundMoveVehiclePacket(teleported));
+            }
+        }
 
         // サーバー側フック処理
         PortalHandler.handlePortalEntry(entity, this);
@@ -284,7 +307,7 @@ public class PortalEntity extends Entity {
 
     /**
      * 転送先直下にVoidBlockを配置する
-     * 水や空気の場合のみ設置
+     * 真下3ブロックを上から見て、固体より先に液体があるか、3ブロックとも空気の場合のみ設置
      */
     private void tryPlaceVoidBlock(ServerLevel level, BlockPos tpTargetPos) {
         BlockPos placePos = tpTargetPos.below(1);
@@ -293,12 +316,12 @@ public class PortalEntity extends Entity {
             BlockPos checkPos = tpTargetPos.below(i);
             var state = level.getBlockState(checkPos);
 
-            if (!state.isAir() && state.getFluidState().isEmpty()) return;
-
-            if (!state.getFluidState().isEmpty()) {
+            if (state.getBlock() instanceof LiquidBlock) {
                 level.setBlock(placePos, ModBlocksCommon.VOID_BLOCK.defaultBlockState(), 3);
                 return;
             }
+
+            if (!state.isAir()) return;
         }
         level.setBlock(placePos, ModBlocksCommon.VOID_BLOCK.defaultBlockState(), 3);
     }
@@ -328,8 +351,9 @@ public class PortalEntity extends Entity {
         entityData.set(IS_PLACE_PORTAL, isPlace);
     }
 
-    public UUID getOwnerUuid() {
-        return UUID.fromString(entityData.get(OWNER_UUID));
+    public @Nullable UUID getOwnerUuid() {
+        String uuidStr = entityData.get(OWNER_UUID);
+        return uuidStr.isEmpty() ? null : UUID.fromString(uuidStr);
     }
 
     public UUID getWaypointUuid() {
@@ -360,11 +384,11 @@ public class PortalEntity extends Entity {
         return String.format("XYZ: %s / %s / %s", entityData.get(TARGET_X), entityData.get(TARGET_Y), entityData.get(TARGET_Z));
     }
 
-    public Long getSpawnTick() {
+    public long getSpawnTick() {
         return entityData.get(SPAWN_TICK);
     }
 
-    public Long getVanishStartTick() {
+    public long getVanishStartTick() {
         return entityData.get(VANISH_START_TICK);
     }
 

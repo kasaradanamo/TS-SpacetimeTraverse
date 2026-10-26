@@ -2,27 +2,19 @@ package net.kasara.ts_spacetime_traverse.neoforge.server;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.neoforge.TSSpacetimeTraverse;
-import net.kasara.ts_spacetime_traverse.network.packet.s2c.DimensionListS2CPacket;
 import net.kasara.ts_spacetime_traverse.network.packet.s2c.WaypointInfoS2CPacket;
+import net.kasara.ts_spacetime_traverse.server.DimensionListSender;
 import net.kasara.ts_spacetime_traverse.server.PortalHandler;
 import net.kasara.ts_spacetime_traverse.server.PortalManager;
 import net.kasara.ts_spacetime_traverse.server.WaypointServerManager;
-import net.kasara.ts_spacetime_traverse.util.DimensionBounds;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.border.WorldBorder;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -45,17 +37,23 @@ public class ModServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
-        // クライアントにnbt情報を伝える
+        // クライアントにウェイポイント情報を送る
         WaypointInfoS2CPacket.send(player, WaypointServerManager.getAll(player), WaypointServerManager.getQuick(player));
 
         // クライアントにディメンションリストを送る
-        sendDimensionList(player.level().getServer(), player);
+        DimensionListSender.send(player.level().getServer(), player);
     }
 
     // サーバーtickごとにポータルのあるディメンションを稼働させ続ける
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         PortalManager.keepPortalDimensionsActive();
+    }
+
+    // ボーダーが変わったtickの終わりに送る
+    @SubscribeEvent
+    public static void onServerTickBorders(ServerTickEvent.Post event) {
+        DimensionListSender.sendIfBordersChanged(event.getServer());
     }
 
     // プレイヤーがサーバーから切断したときの処理
@@ -68,6 +66,12 @@ public class ModServerEvents {
         PortalHandler.discardOwnedPortals(player.level().getServer(), uuid);
     }
 
+    // サーバーが起動したとき
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        DimensionListSender.watchBorders(event.getServer());
+    }
+
     // サーバーが終了するとき
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent event) {
@@ -75,7 +79,7 @@ public class ModServerEvents {
         PortalHandler.discardAllPortals(event.getServer());
     }
 
-    // プレイヤーエンティティがコピーされるとき(死亡・ディメンション移動など)
+    // 死亡やエンドからの帰還でプレイヤーが作り直されるとき
     @SubscribeEvent
     public static void onClone(PlayerEvent.Clone event) {
         if (!(event.getOriginal() instanceof ServerPlayer oldPlayer)) return;
@@ -83,32 +87,5 @@ public class ModServerEvents {
 
         // Waypointデータを新しいプレイヤーに引き継ぐ
         WaypointServerManager.copyFrom(oldPlayer, newPlayer);
-    }
-
-    /**
-     * ディメンション名リストを作成してパケット送信
-     */
-    private static void sendDimensionList(MinecraftServer server, ServerPlayer player) {
-        Map<ResourceLocation, DimensionBounds> map = new HashMap<>();
-
-        for (ResourceKey<Level> key : server.levelKeys()) {
-            ServerLevel level = server.getLevel(key);
-            if (level == null) continue;
-
-            WorldBorder border = level.getWorldBorder();
-
-            DimensionBounds info = new DimensionBounds(
-                    level.getMinBuildHeight() + 1,
-                    level.getMaxBuildHeight(),
-                    border.getMinX(),
-                    border.getMaxX(),
-                    border.getMinZ(),
-                    border.getMaxZ()
-            );
-
-            map.put(key.location(), info);
-        }
-
-        DimensionListS2CPacket.send(player, map);
     }
 }

@@ -5,16 +5,18 @@ import net.kasara.ts_spacetime_traverse.entity.PortalEntity;
 import net.kasara.ts_spacetime_traverse.util.WaypointData;
 import net.kasara.ts_spacetime_traverse.util.WaypointDataUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.UUID;
 
 /**
  * サーバー側でのポータル生成・消滅・リンク管理を担当するクラス
@@ -41,6 +43,12 @@ public class PortalHandler {
         WaypointData data = WaypointServerManager.get(player, waypointUuid);
         if (data == null) return;
 
+        // 行き先のディメンションが存在しなければ設置しない
+        if (level.getServer().getLevel(data.dimension()) == null) {
+            player.sendSystemMessage(Component.translatable("message.tokorotenslime.dimension_not_found"), true);
+            return;
+        }
+
         // ポータル設置位置を探索
         Vec3 pos = findPortalSpawnPos(player, level, data);
         if (pos == null) {
@@ -62,14 +70,9 @@ public class PortalHandler {
     public static void vanishOwnedPortals(ServerPlayer player) {
         PortalEntity portal = PortalManager.getActivePlacePortal(player.getUUID());
         if (portal == null) return;
-        if (!(player.getUUID().equals(portal.getOwnerUuid()))) return;
 
+        // リンクされている戻りポータルも同時に消える
         portal.startVanish(portal.level().getGameTime());
-
-        // リンクされている戻りポータルも同時に消す
-        PortalEntity linkPortal = portal.getLinkedPortal();
-        if (linkPortal == null || !(player.getUUID().equals(linkPortal.getOwnerUuid()))) return;
-        linkPortal.startVanish(linkPortal.level().getGameTime());
     }
 
     /**
@@ -98,7 +101,7 @@ public class PortalHandler {
     /**
      * ポータル侵入時に、戻り用ポータルを生成する処理
      *
-     * @param inEntity ポータルに入ったエンティティ
+     * @param inEntity 送ったエンティティ
      * @param enteredPortal 入ってきたポータル
      */
     public static void handlePortalEntry(Entity inEntity, PortalEntity enteredPortal) {
@@ -154,7 +157,7 @@ public class PortalHandler {
      * @param level スポーンさせるワールド
      * @param pos スポーン位置
      * @param waypoint 行き先Waypoint情報
-     * @param enteredPortal 既存ポータルから生成されたかどうか（戻りポータル用）
+     * @param enteredPortal 入ってきたポータル(プレイヤーが設置する時はnull)
      */
     private static PortalEntity spawnPortal(Entity entity, ServerLevel level, Vec3 pos, WaypointData waypoint, @Nullable PortalEntity enteredPortal) {
         PortalEntity portal = new PortalEntity(ModEntitiesCommon.PORTAL, level);
@@ -200,7 +203,7 @@ public class PortalHandler {
         for (double f : forwardOffsets) {
             for (double h : heightOffsets) {
                 Vec3 pos = eyePos.add(0, h, 0).add(look.scale(f));
-                if (forbiddenBox.contains(pos)) continue;
+                if (data.dimension().equals(level.dimension()) && forbiddenBox.contains(pos)) continue;
 
                 AABB box = new AABB(
                         pos.x - 0.2, pos.y - PLAYER_PLACE_Y_OFFSET, pos.z - 0.2,
@@ -212,12 +215,20 @@ public class PortalHandler {
                 // エンティティとの重なりは、実際に設置されるポータルの当たり判定で見る
                 AABB portalBox = PortalEntity.createHitbox(
                         new Vec3(pos.x, pos.y - PLAYER_PLACE_Y_OFFSET, pos.z));
-                if (!level.getEntities(null, portalBox).isEmpty()) return null;
+                if (!level.getEntities((Entity) null, portalBox, entity -> !isVanishingOwnPortal(entity, player)).isEmpty()) return null;
 
                 return pos;
             }
         }
         return null;
+    }
+
+    /**
+     * 自分の消えかけのポータル
+     */
+    private static boolean isVanishingOwnPortal(Entity entity, ServerPlayer player) {
+        return entity instanceof PortalEntity portal && portal.isVanishing()
+                && player.getUUID().equals(portal.getOwnerUuid());
     }
 
     /**
@@ -258,20 +269,6 @@ public class PortalHandler {
      * yawを東西南北の4方向にする
      */
     private static float roundYawToCardinal(float yaw) {
-        yaw = normalizeYaw(yaw);
-
-        if (yaw >= -45f && yaw < 45f) return 0f;        // 南
-        else if (yaw >= 45f && yaw < 135f) return 90f; // 西
-        else if (yaw >= -135f && yaw < -45f) return -90f; // 東
-        else return 180f;                                   // 北
-    }
-
-    /**
-     * yawを-180～180で正規化
-     */
-    private static float normalizeYaw(float yaw) {
-        if (yaw > 180f) return yaw - 360f;
-        if (yaw < -180f) return yaw + 360f;
-        return yaw;
+        return Mth.wrapDegrees(Direction.fromYRot(yaw).toYRot());
     }
 }

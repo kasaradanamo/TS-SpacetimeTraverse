@@ -38,7 +38,7 @@ public class TSSpacetimeTraverse implements ModInitializer {
         ModEntities.register();
         ModEntitiesCommon.PORTAL = ModEntities.PORTAL;
 
-        // C2Sパケット登録
+        // パケット登録
         ModPackets.registerPayloadTypes();
         ModPackets.registerC2SPackets();
         // サーバー側からクライアントへの送信ブリッジ

@@ -137,9 +137,7 @@ public class PortalActionScreen extends Screen {
      * ウェイポイントリストを再生成して更新
      */
     public void refreshWaypointList() {
-        this.removeWidget(this.body);
-        this.body = this.layout.addToContents(new WaypointListWidget(this.minecraft, this));
-        this.addRenderableWidget(this.body);
+        this.body.refreshEntries();
         updateActionButtons(null);
     }
 

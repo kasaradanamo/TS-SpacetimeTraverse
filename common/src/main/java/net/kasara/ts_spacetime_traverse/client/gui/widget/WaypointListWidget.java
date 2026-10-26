@@ -1,5 +1,6 @@
 package net.kasara.ts_spacetime_traverse.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.client.gui.screen.PortalActionScreen;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -26,12 +28,26 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
         this.centerListVertically = false;
         this.parentScreen = screen;
 
-        // ClientWaypointManagerから全ウェイポイントを取得してEntryを追加
-        WaypointClientCache.getAll().forEach(data -> this.addEntry(new Entry(this, data, minecraft)));
+        refreshEntries();
     }
 
     /**
-     * 左右2px広げる
+     * WaypointClientCacheから全ウェイポイントを取得してEntryを作り直す
+     */
+    public void refreshEntries() {
+        this.clearEntries();
+        WaypointClientCache.getAll().forEach(data -> this.addEntry(new Entry(this, data, this.minecraft)));
+        this.setScrollAmount(0);
+    }
+
+    @Override
+    public void setSelected(@Nullable Entry entry) {
+        super.setSelected(entry);
+        parentScreen.updateActionButtons(entry);
+    }
+
+    /**
+     * 四辺を2pxずつ広げる
      */
     @Override
     protected void renderSelection(GuiGraphics graphics, int top, int width, int height, int outlineColor, int fillColor) {
@@ -106,10 +122,8 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0) {
-                // 選択とボタン状態更新
+            if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                 parent.setSelected(this);
-                parent.parentScreen.updateActionButtons(this);
                 return true;
             }
             return false;

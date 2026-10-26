@@ -39,18 +39,18 @@ public class WaypointFormBodyWidget extends ContainerObjectSelectionList<Waypoin
     private static final int COORDS_WIDTH = 60;
     private static final int ENTRY_HEIGHT = 174;
 
-    // 座標欄の入力制限
+    // 座標欄の数値形式
     private static final Pattern INT_PATTERN = Pattern.compile("-?(0|[1-9]\\d*)?");
 
     /**
      * コンストラクタ
      *
-     * @param minecraft MinecraftClient
+     * @param minecraft Minecraft
      * @param screen    親スクリーン
      * @param data      編集時のWaypointデータ(登録時はnull)
      */
     public WaypointFormBodyWidget(Minecraft minecraft, WaypointFormScreen screen, @Nullable WaypointData data) {
-        // 1.21.1はエントリごとの可変高さが無いため、フォーム全体の高さをitemHeightにする
+        // フォーム全体の高さをitemHeightにする
         super(minecraft, screen.width, screen.layout.getContentHeight(), screen.layout.getHeaderHeight(), ENTRY_HEIGHT);
         this.centerListVertically = false;
         this.screen = screen;
@@ -89,7 +89,7 @@ public class WaypointFormBodyWidget extends ContainerObjectSelectionList<Waypoin
         private WaypointDirection direction = WaypointDirection.SOUTH;
         private final Button directionButton;
 
-        // children()で返すためのUI要素一覧
+        // narratables()で返すためのUI要素一覧
         private final List<AbstractWidget> elements;
 
         /**
@@ -133,6 +133,7 @@ public class WaypointFormBodyWidget extends ContainerObjectSelectionList<Waypoin
             // ディメンション
             dimensionLabel = new StringWidget(Component.translatable("screen.tokorotenslime.waypoint_register.dimension"), font);
             dimensionField = new EditBox(font, FIELD_WIDTH, FIELD_HEIGHT, Component.empty());
+            dimensionField.setMaxLength(256);
             dimensionField.setHint(Component.literal(defDimName));
             if (!dimName.equals(defDimName)) dimensionField.setValue(dimName);
             elements.add(dimensionLabel);
@@ -232,7 +233,7 @@ public class WaypointFormBodyWidget extends ContainerObjectSelectionList<Waypoin
         }
 
         /**
-         * 入力・クリック対象の UI 一覧
+         * 読み上げ対象のUI一覧
          */
         @Override
         public List<? extends NarratableEntry> narratables() {
@@ -240,7 +241,7 @@ public class WaypointFormBodyWidget extends ContainerObjectSelectionList<Waypoin
         }
 
         /**
-         * キーボード操作でフォーカス可能な要素
+         * 入力・クリック・キーボード操作の対象になる要素
          */
         @Override
         public List<? extends GuiEventListener> children() {
@@ -324,7 +325,7 @@ public class WaypointFormBodyWidget extends ContainerObjectSelectionList<Waypoin
             // 数値形式チェック
             if (!INT_PATTERN.matcher(text).matches()) return false;
 
-            // -000みたいなの禁止
+            // -0は不可
             if (text.matches("-0+")) return false;
 
             try {

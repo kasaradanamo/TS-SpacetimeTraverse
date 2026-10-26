@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
  * ・タイトル
  * ・初期値
  * ・保存時のUUID
+ * ・確定ボタンの文字
  * だけが切り替わる
  */
 public class WaypointFormScreen extends Screen {
@@ -160,7 +161,6 @@ public class WaypointFormScreen extends Screen {
                     // 親画面の一覧を更新
                     if (this.parent instanceof PortalActionScreen portal) {
                         portal.refreshWaypointList();
-                        portal.updateActionButtons(null);
                     }
 
                     // 親画面へ戻る
