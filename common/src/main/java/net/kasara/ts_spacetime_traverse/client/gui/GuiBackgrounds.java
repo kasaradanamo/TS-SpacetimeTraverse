@@ -15,7 +15,7 @@ public final class GuiBackgrounds {
         graphics.fill(0, 0, width, height, MENU_BACKGROUND);
     }
 
-    // inworld_header/footer_separator.png の各行の色(高さ2px)
+    // 区切り線の各行の色
     private static final int SEPARATOR_LIGHT = 0x33FFFFFF;
     private static final int SEPARATOR_DARK = 0xBF000000;
 

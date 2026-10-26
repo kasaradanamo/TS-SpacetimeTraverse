@@ -46,7 +46,6 @@ public class WaypointClientManager {
      * @param quickUuid サーバーが指定するクイックウェイポイントのUUID
      */
     public static void waypointInfo(List<WaypointData> waypoints, @Nullable UUID quickUuid) {
-        WaypointClientCache.clear();
         WaypointClientCache.setAll(waypoints);
         WaypointClientCache.setQuick(quickUuid);
     }

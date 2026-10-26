@@ -5,7 +5,6 @@ import net.kasara.tokorotenslime.TokorotenSlimeCommon;
 import net.kasara.ts_spacetime_traverse.TSSpacetimeTraverseCommon;
 import net.kasara.ts_spacetime_traverse.client.PortalActionClientHandler;
 import net.kasara.ts_spacetime_traverse.client.PositionSwapClientHandler;
-import net.minecraft.client.Minecraft;
 
 /**
  * クライアント側のイベント登録クラス

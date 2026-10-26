@@ -9,7 +9,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -20,14 +22,20 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,7 +51,6 @@ public class PortalEntity extends Entity {
     public static final int ANIMATION_TICKS = (int) (20 * 1.2f);
 
     // チャンクロード維持用のカスタムチケット
-    // (26.2のTicketType.ENDER_PEARLは1.20.1に存在しないため、同じtimeout=40tickのチケットを自前定義)
     private static final TicketType<ChunkPos> PORTAL_TICKET =
             TicketType.create("ts_spacetime_portal", Comparator.comparingLong(ChunkPos::toLong), 40);
 
@@ -80,7 +87,7 @@ public class PortalEntity extends Entity {
     }
 
     /**
-     * DataTracker初期化
+     * SynchedEntityData初期化
      */
     @Override
     protected void defineSynchedData() {
@@ -140,6 +147,12 @@ public class PortalEntity extends Entity {
 
         if (!(level() instanceof ServerLevel serverLevel)) return;
 
+        // 所有者なし
+        if (getOwnerUuid() == null) {
+            discard();
+            return;
+        }
+
         long worldTime = serverLevel.getGameTime();
 
         // 初回 tick で spawnTick を確定
@@ -156,9 +169,16 @@ public class PortalEntity extends Entity {
             if (targetLevel != null) {
                 AABB portalBox = this.getBoundingBox();
 
+                Set<Entity> sent = new HashSet<>();
                 for (Entity entity : level().getEntities(this, portalBox.inflate(3))) {
-                    if (!(entity instanceof PortalEntity) && shouldTeleport(entity, portalBox)) {
-                        teleport(entity, targetLevel);
+                    // 送った乗り物に乗っていたもの
+                    if (entity.isRemoved() || entity.level() != level()) continue;
+
+                    // 乗り物ごと
+                    Entity root = entity.getRootVehicle();
+                    if (!sent.contains(root) && shouldTeleport(entity, root, portalBox)) {
+                        sent.add(root);
+                        teleport(root, targetLevel);
                     }
                 }
             }
@@ -190,7 +210,7 @@ public class PortalEntity extends Entity {
     }
 
     /**
-     * 消滅処開始
+     * 消滅処理開始
      *
      * @param worldTime 消滅を始めたワールド時間
      */
@@ -221,7 +241,13 @@ public class PortalEntity extends Entity {
     /**
      * ポータルに入るかの判定
      */
-    private boolean shouldTeleport(Entity entity, AABB portalBox) {
+    private boolean shouldTeleport(Entity entity, Entity root, AABB portalBox) {
+        // ポータルに入れないもの
+        if (root.isVehicle()
+                ? root instanceof EnderDragon || root instanceof WitherBoss
+                : !root.canChangeDimensions()) return false;
+        if (root instanceof EnderDragonPart) return false;
+
         // 接触判定
         if (entity.getBoundingBox().intersects(portalBox)) {
             return true;
@@ -237,7 +263,7 @@ public class PortalEntity extends Entity {
     /**
      * ワープ処理
      *
-     * @param entity 入ったEntity
+     * @param entity 送るエンティティ
      * @param targetLevel 行き先のサーバーワールド
      */
     private void teleport(Entity entity, ServerLevel targetLevel) {
@@ -259,15 +285,36 @@ public class PortalEntity extends Entity {
         Vec3 motion = entity.getDeltaMovement().yRot((float) Math.toRadians(yaw - entity.getYRot()));
 
         // 足場用の VoidBlock を配置
-        if (entity instanceof LivingEntity le && !le.isFallFlying()) {
+        boolean fallFlying = entity instanceof LivingEntity le && le.isFallFlying();
+        if (!fallFlying && entity.getSelfAndPassengers().anyMatch(e -> e instanceof LivingEntity)) {
             tryPlaceVoidBlock(targetLevel, targetBlockPos);
             motion = new Vec3(0, 0, 0);
         }
 
+        Entity moved = moveWithPassengers(entity, targetLevel, x, y, z, yaw, pitch, motion);
+        if (moved == null) return;
+
+        // 操作中の乗り物の位置をクライアントに送る
+        if (targetLevel == level() && moved.getControllingPassenger() instanceof ServerPlayer player) {
+            player.connection.send(new ClientboundMoveVehiclePacket(moved));
+        }
+
+        // サーバー側フック処理
+        PortalHandler.handlePortalEntry(moved, this);
+    }
+
+    /**
+     * 乗っているものごと移動
+     *
+     * @return 移動後のエンティティ(移せなかったらnull)
+     */
+    private @Nullable Entity moveWithPassengers(Entity entity, ServerLevel targetLevel, double x, double y, double z, float yaw, float pitch, Vec3 motion) {
+        List<Entity> passengers = entity.getPassengers();
+        entity.ejectPassengers();
+
         if (entity instanceof ServerPlayer player) {
             boolean changedDimension = targetLevel != player.level();
 
-            // プレイヤーは同一/別次元どちらもteleportToが対応(内部でconnection.teleportまたは次元移動処理)
             player.teleportTo(targetLevel, x, y, z, Set.<RelativeMovement>of(), yaw, pitch);
             player.setDeltaMovement(motion);
             player.hurtMarked = true;   // 速度をクライアントに同期
@@ -284,9 +331,9 @@ public class PortalEntity extends Entity {
             entity.setDeltaMovement(motion);
             entity.hurtMarked = true;
         } else {
-            // 別次元のエンティティ: バニラの次元移動と同じ「再生成」方式
+            // 別次元のエンティティは作り直して移す
             Entity newEntity = entity.getType().create(targetLevel);
-            if (newEntity == null) return;
+            if (newEntity == null) return null;
 
             newEntity.restoreFrom(entity);
             newEntity.moveTo(x, y, z, yaw, pitch);
@@ -298,13 +345,20 @@ public class PortalEntity extends Entity {
 
         entity.fallDistance = 0.0f;
 
-        // サーバー側フック処理
-        PortalHandler.handlePortalEntry(entity, this);
+        // 乗せ直す
+        for (Entity passenger : passengers) {
+            Entity movedPassenger = moveWithPassengers(passenger, targetLevel, x, y, z, yaw, passenger.getXRot(), motion);
+            if (movedPassenger != null) movedPassenger.startRiding(entity, true);
+        }
+        if (!passengers.isEmpty()) {
+            targetLevel.getChunkSource().broadcastAndSend(entity, new ClientboundSetPassengersPacket(entity));
+        }
+        return entity;
     }
 
     /**
      * 転送先直下にVoidBlockを配置する
-     * 水や空気の場合のみ設置
+     * 真下3ブロックを上から見て、固体より先に液体があるか、3ブロックとも空気の場合のみ設置
      */
     private void tryPlaceVoidBlock(ServerLevel level, BlockPos tpTargetPos) {
         BlockPos placePos = tpTargetPos.below(1);
@@ -313,12 +367,12 @@ public class PortalEntity extends Entity {
             BlockPos checkPos = tpTargetPos.below(i);
             var state = level.getBlockState(checkPos);
 
-            if (!state.isAir() && state.getFluidState().isEmpty()) return;
-
-            if (!state.getFluidState().isEmpty()) {
+            if (state.getBlock() instanceof LiquidBlock) {
                 level.setBlock(placePos, ModBlocksCommon.VOID_BLOCK.defaultBlockState(), 3);
                 return;
             }
+
+            if (!state.isAir()) return;
         }
         level.setBlock(placePos, ModBlocksCommon.VOID_BLOCK.defaultBlockState(), 3);
     }
@@ -348,8 +402,9 @@ public class PortalEntity extends Entity {
         entityData.set(IS_PLACE_PORTAL, isPlace);
     }
 
-    public UUID getOwnerUuid() {
-        return UUID.fromString(entityData.get(OWNER_UUID));
+    public @Nullable UUID getOwnerUuid() {
+        String uuidStr = entityData.get(OWNER_UUID);
+        return uuidStr.isEmpty() ? null : UUID.fromString(uuidStr);
     }
 
     public UUID getWaypointUuid() {
@@ -380,11 +435,11 @@ public class PortalEntity extends Entity {
         return String.format("XYZ: %s / %s / %s", entityData.get(TARGET_X), entityData.get(TARGET_Y), entityData.get(TARGET_Z));
     }
 
-    public Long getSpawnTick() {
+    public long getSpawnTick() {
         return entityData.get(SPAWN_TICK);
     }
 
-    public Long getVanishStartTick() {
+    public long getVanishStartTick() {
         return entityData.get(VANISH_START_TICK);
     }
 
@@ -418,7 +473,6 @@ public class PortalEntity extends Entity {
 
     /**
      * 指定したエンティティ座標におけるポータルの当たり判定
-     * 設置可否の判定でも同じ形を使うため、ここに集約する
      */
     public static AABB createHitbox(Vec3 pos) {
         double width = 0.5;

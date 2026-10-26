@@ -1,5 +1,6 @@
 package net.kasara.ts_spacetime_traverse.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_spacetime_traverse.client.data.WaypointClientCache;
 import net.kasara.ts_spacetime_traverse.client.gui.screen.PortalActionScreen;
@@ -11,6 +12,7 @@ import net.kasara.ts_spacetime_traverse.client.gui.GuiBackgrounds;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import javax.annotation.Nullable;
 
 import java.util.UUID;
 
@@ -30,16 +32,16 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
 
         this.parentScreen = screen;
 
-        // バニラ既定の土テクスチャ背景・上下の帯を描かない(26.2相当のものをrenderで描く)
+        // バニラ既定の土テクスチャ背景・上下の帯を描かない
         setRenderBackground(false);
         setRenderTopAndBottom(false);
 
-        // ClientWaypointManagerから全ウェイポイントを取得してEntryを追加
+        // WaypointClientCacheから全ウェイポイントを取得してEntryを追加
         WaypointClientCache.getAll().forEach(data -> this.addEntry(new Entry(this, data, minecraft)));
     }
 
     /**
-     * 26.2相当のリスト背景と区切り線を描く
+     * リスト背景と区切り線を描く
      */
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -50,8 +52,14 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
         GuiBackgrounds.drawListSeparators(graphics, this.x0, this.x1, this.y0, this.y1);
     }
 
+    @Override
+    public void setSelected(@Nullable Entry entry) {
+        super.setSelected(entry);
+        parentScreen.updateActionButtons(entry);
+    }
+
     /**
-     * 左右2px広げる
+     * 四辺を2pxずつ広げる
      */
     @Override
     protected void renderSelection(net.minecraft.client.gui.GuiGraphics graphics, int top, int width, int height, int outlineColor, int fillColor) {
@@ -126,10 +134,8 @@ public class WaypointListWidget extends ObjectSelectionList<WaypointListWidget.E
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0) {
-                // 選択とボタン状態更新
+            if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                 parent.setSelected(this);
-                parent.parentScreen.updateActionButtons(this);
                 return true;
             }
             return false;

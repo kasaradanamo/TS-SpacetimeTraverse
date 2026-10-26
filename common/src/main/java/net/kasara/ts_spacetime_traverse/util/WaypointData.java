@@ -19,7 +19,7 @@ import java.util.UUID;
  */
 public record WaypointData(UUID uuid, String name, ResourceKey<Level> dimension, BlockPos blockPos, int yaw) {
 
-    // 26.2のSTREAM_CODECに相当する手動エンコード/デコード(1.20.1 SimpleChannel用)
+    // 手動エンコード/デコード
 
     public static void encode(WaypointData data, FriendlyByteBuf buf) {
         buf.writeUUID(data.uuid());

@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public class ModItems {
 
-    // 時空の目アイテムの登録
+    // 時空の眼アイテムの登録
     public static final Item SPACETIME_EYE = registerItemAndAddToTab("spacetime_eye",
             pros -> new SpacetimeEyeItem(pros.fireResistant().rarity(Rarity.EPIC)));
 

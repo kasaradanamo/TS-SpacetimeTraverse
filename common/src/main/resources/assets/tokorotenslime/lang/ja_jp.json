@@ -15,6 +15,7 @@
   "message.tokorotenslime.position_swap_mode": "位置入れ替えが %s モードになりました！",
   "message.tokorotenslime.not_place_portal": "ウェイポイントがクイック登録されてません",
   "message.tokorotenslime.portal_failed": "ここにはポータルを設置できません",
+  "message.tokorotenslime.dimension_not_found": "登録されているディメンションが存在しません",
 
   "screen.tokorotenslime.portal_action.title": "ウェイポイント一覧",
   "screen.tokorotenslime.portal_action.place": "ポータル設置",

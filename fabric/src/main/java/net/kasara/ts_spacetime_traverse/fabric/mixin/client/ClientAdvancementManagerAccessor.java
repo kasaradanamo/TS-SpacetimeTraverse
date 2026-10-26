@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import java.util.Map;
 
 /**
- * ClientAdvancements#progress(private)に安全にアクセスするためのアクセサ。
+ * ClientAdvancements#progressのアクセサ
  */
 @Mixin(ClientAdvancements.class)
 public interface ClientAdvancementManagerAccessor {

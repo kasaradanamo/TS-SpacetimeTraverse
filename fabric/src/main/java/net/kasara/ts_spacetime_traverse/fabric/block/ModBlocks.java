@@ -16,7 +16,7 @@ import java.util.function.Function;
 
 public class ModBlocks {
 
-    // ポータルくぐった際足元何もなかった時に出てくる一時ブロック
+    // 転送先の足元に置く一時ブロック
     public static final Block VOID_BLOCK = registerBlock("void_block", pros -> new VoidBlock(pros
             .strength(-1.0F, 3600000.0F)    // 岩盤と同じ
             .noLootTable()                      // ドロップなし

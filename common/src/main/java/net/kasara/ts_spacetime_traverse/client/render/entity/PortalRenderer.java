@@ -106,7 +106,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity> {
         double distSq = this.entityRenderDispatcher.camera.getPosition().distanceToSqr(labelPos);
         if (distSq > NAME_TAG_DISTANCE * NAME_TAG_DISTANCE) return;
 
-        // 底上げ分を+0.3に反転してポータル上端から浮かせる
+        // ポータル上端から浮かせる
         poseStack.pushPose();
         poseStack.translate(0, HEIGHT + yOffset + 0.3f, 0);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
@@ -137,7 +137,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity> {
     private float getScale(PortalEntity entity, float now, long spawnTick) {
         float scale;
 
-        // 消失アニメーション中
+        // 消滅アニメーション中
         if (entity.isVanishing()) {
             float elapsed = now - entity.getVanishStartTick();
 

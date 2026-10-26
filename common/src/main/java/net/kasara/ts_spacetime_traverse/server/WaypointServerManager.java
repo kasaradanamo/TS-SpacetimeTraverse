@@ -116,7 +116,7 @@ public final class WaypointServerManager {
     }
 
     /**
-     * リスポーン・ディメンション移動の際コピーする
+     * 死亡やエンドからの帰還でプレイヤーが作り直されるときコピーする
      *
      * @param oldPlayer コピー元のプレイヤー
      * @param newPlayer コピー先のプレイヤー
@@ -143,7 +143,7 @@ public final class WaypointServerManager {
     }
 
     /**
-     * AddonCustomDataからRootを取得
+     * 本体のアドオン用データからRootを取得
      */
     private static WaypointRoot getRoot(Player player) {
         CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSSpacetimeTraverseCommon.MOD_ID);
@@ -151,7 +151,7 @@ public final class WaypointServerManager {
     }
 
     /**
-     * AddonCustomDataに書き込み
+     * 本体のアドオン用データに書き込み
      */
     private static void writeRoot(ServerPlayer player, WaypointRoot root) {
         TokorotenSlimeAPI.writeAddonData(player, TSSpacetimeTraverseCommon.MOD_ID, root.toCompound());

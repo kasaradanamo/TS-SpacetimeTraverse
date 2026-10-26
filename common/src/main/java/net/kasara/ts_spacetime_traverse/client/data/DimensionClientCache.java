@@ -13,7 +13,7 @@ public final class DimensionClientCache {
     private static Map<ResourceLocation, DimensionBounds> dimensions = Map.of();
 
     /**
-     * ディメンション一覧を全上書きする(join時に)
+     * ディメンション一覧を全上書きする
      */
     public static void setAll(Map<ResourceLocation, DimensionBounds> newDimensions) {
         dimensions = Map.copyOf(newDimensions);

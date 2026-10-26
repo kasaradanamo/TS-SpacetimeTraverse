@@ -19,7 +19,8 @@ public class ModEntities {
     // ポータルエンティティのEntityType定義
     public static final RegistryObject<EntityType<PortalEntity>> PORTAL =
             ENTITIES.register("portal", () -> EntityType.Builder.<PortalEntity>of(PortalEntity::new, MobCategory.MISC)
-                    .sized(1.0F, 2.0F)          // ヒットボックスの幅・高さ
+                    .sized(1.0F, 2.0F)
+                    .fireImmune()
                     .clientTrackingRange(8)   // サーバーとの同期範囲
                     .updateInterval(20)                     // 同期間隔
                     .build(TokorotenSlimeCommon.MOD_ID + ":portal")

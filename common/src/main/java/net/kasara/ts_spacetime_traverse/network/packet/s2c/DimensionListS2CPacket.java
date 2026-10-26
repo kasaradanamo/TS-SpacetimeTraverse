@@ -33,7 +33,6 @@ public record DimensionListS2CPacket(Map<ResourceLocation, DimensionBounds> dime
         ModPacketsCommon.SEND_TO_PLAYER.accept(player, new DimensionListS2CPacket(dimensions));
     }
 
-    // クライアント側のみで処理するため受信コンテキストは不要
     public static void handle(DimensionListS2CPacket packet) {
         DimensionClientCache.setAll(packet.dimensions());
     }

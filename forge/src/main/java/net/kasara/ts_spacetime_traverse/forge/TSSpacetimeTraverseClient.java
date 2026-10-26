@@ -21,7 +21,7 @@ public class TSSpacetimeTraverseClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            // Mixinアクセサ経由で実績進捗マップを取得する実装をセット
+            // Mixinアクセサ経由で進捗マップを取得する実装をセット
             ClientAdvancementUtil.GET_PROGRESS_MAP = ca -> ((ClientAdvancementManagerAccessor) ca).getProgress();
 
             // クライアントイベント登録

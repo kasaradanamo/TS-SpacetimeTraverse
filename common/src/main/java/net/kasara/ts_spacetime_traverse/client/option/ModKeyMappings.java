@@ -15,7 +15,7 @@ public class ModKeyMappings {
             TokorotenSlimeClientAPI.getKeyMappingCategory() // カテゴリ名(オプション画面で表示されるグループ)
     );
 
-    // ポータル出現
+    // ポータル操作用のキー
     public static final KeyMapping PORTAL_ACTION = new KeyMapping(
             "key.tokorotenslime.portal_action",   // キー名(翻訳用)
             InputConstants.Type.KEYSYM,                 // キーの種類

@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
  */
 public class PortalActionScreen extends Screen {
 
-    // 3分割レイアウト相当の領域定義(26.2のHeaderAndFooterLayout(8+9+8+4, 60)と同じ値)
+    // 3分割レイアウトの領域定義
     public static final int HEADER_HEIGHT = 8 + 9 + 8 + 4;
     public static final int FOOTER_HEIGHT = 60;
 
@@ -114,7 +114,7 @@ public class PortalActionScreen extends Screen {
     }
 
     /**
-     * ワールド内では26.2と同じく一様な半透明で塗る(バニラのグラデーションは使わない)
+     * ワールド内では一様な半透明で塗る
      */
     @Override
     public void renderBackground(GuiGraphics guiGraphics) {

@@ -5,6 +5,7 @@
 	"compatibilityLevel": "JAVA_17",
 	"refmap": "ts_spacetime_traverse.forge.refmap.json",
 	"mixins": [
+		"ServerGamePacketListenerImplMixin"
 	],
 	"client": [
 		"client.ClientAdvancementManagerAccessor"

@@ -61,7 +61,7 @@ public class ModPackets {
             server.execute(() -> VanishPortalC2SPacket.handle(packet, player));
         });
 
-        // common側のsend()静的メソッドから呼ばれる送信ブリッジをセット
+        // 送信ブリッジをセット
         ModPacketsCommon.SEND_TO_SERVER = ModPackets::sendToServer;
         ModPacketsCommon.SEND_TO_PLAYER = ModPackets::sendToPlayer;
 
@@ -79,7 +79,6 @@ public class ModPackets {
         }
     }
 
-    // クライアント側からのsendToServer()はfabricモジュールのクライアント専用クラス(ClientModPackets)が担当する
     private static void sendToServer(Object message) {
         net.kasara.ts_spacetime_traverse.fabric.client.network.ClientModPackets.send(message);
     }

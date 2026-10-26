@@ -10,7 +10,6 @@ import java.util.Map;
 
 /**
  * ClientAdvancementsにアクセスするためのMixinAccessor
- * 通常は非公開のprogressフィールドに外部から安全にアクセスするためのインターフェース
  */
 @Mixin(ClientAdvancements.class)
 public interface ClientAdvancementManagerAccessor {

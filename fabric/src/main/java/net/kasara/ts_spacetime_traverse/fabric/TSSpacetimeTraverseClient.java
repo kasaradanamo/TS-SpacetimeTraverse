@@ -20,7 +20,7 @@ public class TSSpacetimeTraverseClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // Mixinアクセサ経由で実績進捗マップを取得する実装をセット
+        // Mixinアクセサ経由で進捗マップを取得する実装をセット
         ClientAdvancementUtil.GET_PROGRESS_MAP = ca -> ((ClientAdvancementManagerAccessor) ca).getProgress();
 
         // クライアント専用ネットワーキング登録
@@ -38,7 +38,7 @@ public class TSSpacetimeTraverseClient implements ClientModInitializer {
         // ポータルエンティティ描画登録
         EntityRendererRegistry.register(ModEntities.PORTAL, PortalRenderer::new);
 
-        // 半透明描画レイヤー登録(モデルJSONのrender_typeはForge独自拡張のため別途指定が必要)
+        // 半透明描画レイヤー登録
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.VOID_BLOCK, RenderType.translucent());
 
         TSSpacetimeTraverseCommon.LOGGER.info("Registering addon Mod Key Mappings/Renderers for " + TokorotenSlimeCommon.MOD_ID + " (from " + TSSpacetimeTraverseCommon.MOD_ID + ")");

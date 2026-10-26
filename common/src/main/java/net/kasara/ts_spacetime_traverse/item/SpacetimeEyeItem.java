@@ -27,9 +27,6 @@ public class SpacetimeEyeItem extends Item {
         // 右クリック時に手に持ってるアイテムスタックを取得
         ItemStack stack = player.getItemInHand(hand);
 
-        // 使用した手をMinecraftに通知(アニメーションなどで必要)
-        player.startUsingItem(hand);
-
         // サーバー側かつプレイヤーがサーバープレイヤーエンティティの場合
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
 

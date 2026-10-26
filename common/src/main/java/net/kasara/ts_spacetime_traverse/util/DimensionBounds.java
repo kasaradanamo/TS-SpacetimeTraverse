@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 
 public record DimensionBounds(int minY, int maxY, double minX, double maxX, double minZ, double maxZ) {
 
-    // 26.2のSTREAM_CODECに相当する手動エンコード/デコード(1.20.1 SimpleChannel用)
+    // 手動エンコード/デコード
 
     public static void encode(DimensionBounds bounds, FriendlyByteBuf buf) {
         buf.writeInt(bounds.minY());

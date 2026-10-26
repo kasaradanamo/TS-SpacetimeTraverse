@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
  */
 public class WaypointFormScreen extends Screen {
 
-    // ヘッダー/フッターの高さ(26.2のHeaderAndFooterLayoutと同値)
+    // ヘッダー/フッターの高さ
     public static final int HEADER_HEIGHT = 8 + 9 + 8 + 4;
     public static final int FOOTER_HEIGHT = HEADER_HEIGHT;
 
@@ -145,7 +145,6 @@ public class WaypointFormScreen extends Screen {
                     // 親画面の一覧を更新
                     if (this.parent instanceof PortalActionScreen portal) {
                         portal.refreshWaypointList();
-                        portal.updateActionButtons(null);
                     }
 
                     // 親画面へ戻る
@@ -170,7 +169,7 @@ public class WaypointFormScreen extends Screen {
     }
 
     /**
-     * ワールド内では26.2と同じく一様な半透明で塗る(バニラのグラデーションは使わない)
+     * ワールド内では一様な半透明で塗る
      */
     @Override
     public void renderBackground(GuiGraphics guiGraphics) {
@@ -222,7 +221,6 @@ public class WaypointFormScreen extends Screen {
                 WaypointFormBodyWidget.WaypointEntry entry = body.children().get(0);
                 valid = entry.isValid();
 
-                // 1.20.1のEditBoxはカーソル点滅にtickが必要
                 entry.tickFields();
             }
 

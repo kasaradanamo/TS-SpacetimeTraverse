@@ -20,7 +20,7 @@ public record WaypointInfoS2CPacket(List<WaypointData> waypoints, @Nullable UUID
     public static void encode(WaypointInfoS2CPacket packet, FriendlyByteBuf buf) {
         buf.writeCollection(packet.waypoints(), (b, data) -> WaypointData.encode(data, (FriendlyByteBuf) b));
 
-        // quickはnull許容のためOptional相当のフラグ付きで書き込む
+        // quickは有無のフラグ付きで書き込む
         buf.writeBoolean(packet.quick() != null);
         if (packet.quick() != null) {
             buf.writeUUID(packet.quick());
@@ -37,7 +37,6 @@ public record WaypointInfoS2CPacket(List<WaypointData> waypoints, @Nullable UUID
         ModPacketsCommon.SEND_TO_PLAYER.accept(player, new WaypointInfoS2CPacket(new ArrayList<>(waypoints), quick));
     }
 
-    // クライアント側のみで処理するため受信コンテキストは不要
     public static void handle(WaypointInfoS2CPacket packet) {
         WaypointClientManager.waypointInfo(packet.waypoints(), packet.quick());
     }
