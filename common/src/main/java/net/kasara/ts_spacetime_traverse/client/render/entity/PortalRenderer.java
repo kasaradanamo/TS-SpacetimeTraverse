@@ -38,11 +38,11 @@ public class PortalRenderer extends EntityRenderer<PortalEntity> {
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
 
         long spawnTick = entity.getSpawnTick();
-        float now = entity.level().getGameTime() + partialTicks;
+        double now = entity.level().getGameTime() + (double) partialTicks;
 
         // スポーン前はスケール0で非表示
         float scale = spawnTick <= 0 ? 0.0f : getScale(entity, now, spawnTick);
-        float spin = spawnTick <= 0 ? 0.0f : now * SPIN_SPEED;
+        float spin = spawnTick <= 0 ? 0.0f : (float) ((now * SPIN_SPEED) % (Math.PI * 2));
 
         poseStack.pushPose();
 
@@ -132,12 +132,12 @@ public class PortalRenderer extends EntityRenderer<PortalEntity> {
      * @param spawnTick スポーンした時の時間
      * @return スケール
      */
-    private float getScale(PortalEntity entity, float now, long spawnTick) {
+    private float getScale(PortalEntity entity, double now, long spawnTick) {
         float scale;
 
         // 消滅アニメーション中
         if (entity.isVanishing()) {
-            float elapsed = now - entity.getVanishStartTick();
+            float elapsed = (float) (now - entity.getVanishStartTick());
 
             float startScale = entity.getVanishStartScale();
             float duration = entity.getAnimationDuration() * startScale;
@@ -147,7 +147,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity> {
         }
         // 通常スケールアップアニメーション
         else {
-            float elapsed = now - spawnTick;
+            float elapsed = (float) (now - spawnTick);
             scale = Math.min(elapsed / entity.getAnimationDuration(), 1.0f);
         }
         return scale;
