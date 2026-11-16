@@ -122,10 +122,10 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
         super.extractRenderState(entity, state, partialTicks);
 
         long spawnTick = entity.getSpawnTick();
-        float now = entity.level().getGameTime() + partialTicks;
+        double now = entity.level().getGameTime() + (double) partialTicks;
 
         state.scale = spawnTick <= 0 ? 0.0f : getScale(entity, now, spawnTick);
-        state.spin = spawnTick <= 0 ? 0.0f : now * SPIN_SPEED;
+        state.spin = spawnTick <= 0 ? 0.0f : (float) ((now * SPIN_SPEED) % (Math.PI * 2));
         state.entityPos = entity.getPosition(partialTicks);
 
         state.ownerName = entity.getOwnerName();
@@ -141,12 +141,12 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
      * @param spawnTick スポーンした時の時間
      * @return スケール
      */
-    private float getScale(PortalEntity entity, float now, long spawnTick) {
+    private float getScale(PortalEntity entity, double now, long spawnTick) {
         float scale;
 
         // 消滅アニメーション中
         if (entity.isVanishing()) {
-            float elapsed = now - entity.getVanishStartTick();
+            float elapsed = (float) (now - entity.getVanishStartTick());
 
             float startScale = entity.getVanishStartScale();
             float duration = entity.getAnimationDuration() * startScale;
@@ -156,7 +156,7 @@ public class PortalRenderer extends EntityRenderer<PortalEntity, PortalRenderSta
         }
         // 通常スケールアップアニメーション
         else {
-            float elapsed = now - spawnTick;
+            float elapsed = (float) (now - spawnTick);
             scale = Math.min(elapsed / entity.getAnimationDuration(), 1.0f);
         }
         return scale;
